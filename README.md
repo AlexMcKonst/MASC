@@ -6,6 +6,37 @@ I am 3D designer.
 I write code for my menu WIP "MY_AUTOS" with a collection of frequently used commands when working in Blender
 https://blenderartists.org/forum/showthread.php?417317-My_autos
 
+## 1) Seek and destroy.
+
+The first review is the search function "SRCH" duplicates the selected objects. 
+Search the position and rotation of coordinates in space:
+https://youtu.be/MZ1GiW5RNyc
+I tried to implement a search function for duplicates. this feature I saw in G. M.
+
+https://youtu.be/I1_xVNE2N_8
+
+## 2) Girdle them all
+
+The Button "CW": create the one ring or the connection of the two rings (bézier_curve).
+For me it was important to keep the inner diameter of the ring edit the diameter of the profile
+This is a very old video:
+https://youtu.be/qQLArdlLAiE
+
+## 3) Bevel & magic & rock&roll
+
+The Button "Bv ||"
+https://youtu.be/b0_sAtNMQQA
+V 0.2
+]https://youtu.be/nQX2Ch1_dXA
+
+## 4)"RL" Render prop
+
+https://youtu.be/Xeta7tK9J5c
+
+## 5)Button "MatCap".
+Scrolls matcap by pressing the hotkey "F6":
+https://youtu.be/m3Tnw4Agi-M
+
 ## 6) Buttons "Nout" & "Restore". 
 I turn out object normals for quick visual determination of wall thickness. 
 The button "Restore" turns the normals in the opposite direction and, if desired, makes the editable object unique.
