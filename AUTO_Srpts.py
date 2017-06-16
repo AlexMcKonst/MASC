@@ -1389,14 +1389,16 @@ class ExpS(bpy.types.Operator):
 ##        return context.window_manager.invoke_props_dialog(self)
 
 class Matrix(bpy.types.Operator):
-    """Seed"""
+    """Organize objects"""
     bl_idname = "scene.mtrx"
-    bl_label = "Organize objects"
+    bl_label = "Organizer"
     bl_options = {"REGISTER", "UNDO"}
 
     mtc = bpy.props.IntProperty(name = "Count", description = "Count", default = 4, min=2)
     mtx = bpy.props.FloatProperty(name="X", description="X", default=8.0, min = 0.0)
     mty = bpy.props.FloatProperty(name="Y", description="Y", default=10, min = 0.0)
+    mtp = bpy.props.BoolProperty(name="Propotional", description="Propotional", default=True)
+
     def execute(self, context):
         sel = bpy.context.selected_objects
         nup=1
@@ -1404,6 +1406,8 @@ class Matrix(bpy.types.Operator):
         #xx=bpy.data.objects[sel[0].name].location[0]
         #yy=bpy.data.objects[sel[0].name].location[1]
         selNull = sel[0]
+        pp = bpy.data.screens[bpy.context.screen.name].areas[3].spaces[0].pivot_point
+        bpy.data.screens[bpy.context.screen.name].areas[3].spaces[0].pivot_point = 'ACTIVE_ELEMENT'
         if sel != []:
             bpy.data.screens[bpy.context.screen.name].areas[3].spaces[0].use_pivot_point_align = True
             bpy.ops.transform.resize(value=(0, 0, 0),
@@ -1418,22 +1422,30 @@ class Matrix(bpy.types.Operator):
             if i != selNull:
                 if nup <=self.mtc-1:
                     nup = nup+1
-                    bpy.ops.transform.translate(value=(self.mtx, 0, 0),
-                    constraint_axis=(False, False, False),
-                    constraint_orientation='GLOBAL',
-                    mirror=False, proportional='DISABLED',
-                    proportional_edit_falloff='SMOOTH', proportional_size=1
-                    )
-                    i.select = False
+                    # propotional
+                    if self.mtp == 1:
+                        self.mty = self.mtx
+                        bpy.ops.transform.translate(value=(self.mtx, 0, 0),
+                            constraint_axis=(False, False, False),
+                            constraint_orientation='GLOBAL',
+                            mirror=False, proportional='DISABLED',
+                            proportional_edit_falloff='SMOOTH', proportional_size=1
+                            )
+                    else:
+                        bpy.ops.transform.translate(value=(self.mtx, 0, 0),
+                            constraint_axis=(False, False, False),
+                            constraint_orientation='GLOBAL',
+                            mirror=False, proportional='DISABLED',
+                            proportional_edit_falloff='SMOOTH', proportional_size=1
+                            )
+                i.select = False
                 try:
                     if nup == self.mtc:
                         nup = 1
                         bpy.ops.transform.translate(value=(-(self.mtx*(self.mtc-1)), self.mty, 0), constraint_axis=(False, False, False), constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1)
                         selNull = sel[csel]
                 except IndexError:
-                    self.report({'INFO'}, "End of the list")
-                    continue
-        return {'FINISHED'}
+##                    self.report({'INFO'}, "End of the list")
   ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
 
 class AUTPanel(bpy.types.Panel):
