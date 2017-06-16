@@ -4,7 +4,6 @@ Hello!
 
 I am 3D designer.
 I write code for my menu WIP "MY_AUTOS" with a collection of frequently used commands when working in Blender
-https://blenderartists.org/forum/showthread.php?417317-My_autos
 
 ## 1) Seek and destroy.
 
@@ -75,5 +74,6 @@ Hidden functions:
 Organizer of objects into a single matrix:
 https://youtu.be/ByOGW1iX8-s
 
+blenderartists https://blenderartists.org/forum/showthread.php?417317-My_autos
  INSTALL:
 Just copy the file "AUTO_Srpts.py" in the directory "...Blender Foundation\Blender\2.78\scripts\addons"
