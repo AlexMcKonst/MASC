@@ -18,8 +18,9 @@ https://youtu.be/I1_xVNE2N_8
 
 The Button "CW": create the one ring or the connection of the two rings (bézier_curve).
 For me it was important to keep the inner diameter of the ring edit the diameter of the profile
-This is a very old video:
 https://youtu.be/qQLArdlLAiE
+Now it is possible to freely choose one of the three profiles of the section of the circle and the curve
+https://youtu.be/vfmaixzXr8s
 
 ## 3) Bevel & magic & rock&roll
 
@@ -48,8 +49,6 @@ https://youtu.be/0dbRn2qV8Q4
 https://youtu.be/MH2_MhpQiqc
 https://youtu.be/3hNIyrszk4U
 https://youtu.be/uw-Cz4RMIws
-Now it is possible to freely choose one of the three profiles of the section of the circle and the curve
-https://youtu.be/vfmaixzXr8s
 https://youtu.be/3ZPgMQgQQ3k
 
 ## 9)Button "Gruop"
