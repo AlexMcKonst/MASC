@@ -372,7 +372,8 @@ class kurs(bpy.types.Operator):
             #Cur01(scale)
             bpy.ops.view3d.snap_cursor_to_selected()
             bpy.context.space_data.pivot_point = 'CURSOR'
-            bpy.ops.object.orientationvariable(variable="GLOBAL")
+#            bpy.data.screens['Default'].areas[3].spaces[0].transform_orientation = "GLOBAL"
+            bpy.context.space_data.transform_orientation = 'GLOBAL'
         #Cur02(move)
         bpy.context.space_data.use_pivot_point_align = self.kr2
         if self.defo == 1:
