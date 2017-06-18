@@ -1446,6 +1446,8 @@ class Matrix(bpy.types.Operator):
                         selNull = sel[csel]
                 except IndexError:
 ##                    self.report({'INFO'}, "End of the list")
+                        continue
+        return {'FINISHED'}
   ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
 
 class AUTPanel(bpy.types.Panel):
