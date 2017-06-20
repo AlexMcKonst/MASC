@@ -26,7 +26,7 @@ class Gradobj(bpy.types.Operator):
     bl_label = "Grading of objects"
     bl_options = {"REGISTER", "UNDO"}
 
-    opc = bpy.props.BoolProperty(
+        opc = bpy.props.BoolProperty(
         name="XY (Scaling axes)",
         description="Scaling axes",
         default=1
@@ -45,6 +45,11 @@ class Gradobj(bpy.types.Operator):
     rt = bpy.props.FloatProperty(
         name="Axis rotation",
         description="Rotate duplicate object",
+        default=0
+    )
+    rsc = bpy.props.FloatProperty(
+        name="Scale",
+        description="Scale",
         default=0
     )
     dp = bpy.props.IntProperty(
@@ -120,6 +125,7 @@ class Gradobj(bpy.types.Operator):
 #                        proportional_size=1.1
 #                        )
             slo = bpy.context.selected_objects
+            bpy.ops.transform.resize(value=(1+self.rsc, 1+self.rsc, 1), constraint_axis=(True, True, False), constraint_orientation='LOCAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=0.13513)
             bpy.ops.transform.rotate(value=self.rt, axis=(0, 0, 0), constraint_axis=(False, False, True), constraint_orientation='LOCAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.1, release_confirm=True)
             zz = bpy.data.objects[slo[0].name].dimensions[2]
             for i in range(self.dp):
