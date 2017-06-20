@@ -26,7 +26,7 @@ class Gradobj(bpy.types.Operator):
     bl_label = "Grading of objects"
     bl_options = {"REGISTER", "UNDO"}
 
-        opc = bpy.props.BoolProperty(
+    opc = bpy.props.BoolProperty(
         name="XY (Scaling axes)",
         description="Scaling axes",
         default=1
@@ -86,7 +86,6 @@ class Gradobj(bpy.types.Operator):
                         constraint_orientation='LOCAL')
         def dup3():
             """режим правки, дублировать, скайлить, переместить на величину скайла"""
-            #            bpy.ops.apply.transformscale()
             bpy.ops.object.editmode_toggle()
             bpy.ops.mesh.duplicate_move(MESH_OT_duplicate={"mode": 1}, TRANSFORM_OT_translate={"value": (-0, self.pr, 0),
                                                                                                "constraint_axis": (
@@ -109,21 +108,9 @@ class Gradobj(bpy.types.Operator):
             bpy.ops.transform.resize(value=(self.sz, self.sz, 1.0 if self.opc == 1 else self.sz),
                                      constraint_axis=(True, True, False if self.opc == 1 else True),
                                      constraint_orientation='LOCAL')
-            #            bpy.ops.apply.transformscale()
-            # print(ns)
-
-            # bpy.ops.transform.translate(value=(0, self.pr, 0),
-            #                             constraint_axis=(False, True, False),
-            #                             constraint_orientation='LOCAL')
             bpy.ops.object.editmode_toggle()
         # rotation mass
         if bpy.context.selected_objects != []:
-#            bpy.ops.transform.resize(value=(self.sz, self.sz, 1.0),
-#                        constraint_axis=(False, False, False),
-#                        constraint_orientation='LOCAL', mirror=False,
-#                        proportional='DISABLED', proportional_edit_falloff='SMOOTH',
-#                        proportional_size=1.1
-#                        )
             slo = bpy.context.selected_objects
             bpy.ops.transform.resize(value=(1+self.rsc, 1+self.rsc, 1), constraint_axis=(True, True, False), constraint_orientation='LOCAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=0.13513)
             bpy.ops.transform.rotate(value=self.rt, axis=(0, 0, 0), constraint_axis=(False, False, True), constraint_orientation='LOCAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.1, release_confirm=True)
