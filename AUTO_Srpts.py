@@ -724,7 +724,7 @@ class OpsRenderLrs(bpy.types.Operator):
 class GruopForNameItems(bpy.types.Operator):
     """I create a group by the name(item) of the active object"""
     bl_idname = "scene.grpnmimts"
-    bl_label = "GruopForNameItems"
+    bl_label = "Grouping, joining existing groups"
     bl_options = {"REGISTER", "UNDO"}
 
     def myfunc(self, d):
@@ -732,68 +732,80 @@ class GruopForNameItems(bpy.types.Operator):
         if bpy.data.groups.items() != []:
             d.append(('Select a group name', 'Select a group name', 'Select a group name'))
         return d
+
     gset = bpy.props.EnumProperty(
         items=[('Total group', 'Total group', 'Total group'),
                ('Many groups', 'Many groups', 'Many groups')],
-        name="Selcet Menu",
+        name="Grouping method",
         description="Select a method for grouping",
         default='Total group')
 
+    # def myfunc2(self, s):
+        # s = {}
+        # if self.gset == 'Many groups':
+        #     s = {'HIDDEN'}
+        # else:
+        # s = {'ANIMATABLE'}
+        # return s
     gstr = bpy.props.StringProperty(
-        name="Name TotGroup",
-        description="Enter the name of the 'Total group'",
+        name="Any Name",
+        description="Enter the name of the 'Total group'.\nBy default, the group takes the name of the active object",
         default=''
         )
     gset2 = bpy.props.EnumProperty(
         items= myfunc,
-        name="Project Groups",
-        description="Select a group name",
-         )
+        name="Existing groups",
+        description="Select groups from the project to join them",
+        )
 
     def __init__(self):
+        self.gstr =''
         if bpy.data.groups.items() != []:
             self.gset2 = 'Select a group name'
     def execute(self, context):
         obj = bpy.context.selected_objects
-        if obj == []:
-            self.report({'INFO'}, "There is no selected object")
-        if obj != [] and self.gset == 'Many groups':
-            # снять выделение со всего
-            bpy.ops.object.select_all(action='TOGGLE')
-            for i in range(len(obj)):  # цикл от длины списка
-                if obj != None:
-                    # удалить значение по идексу
-                    nm = obj.pop(0)
-                # получение имени выделенного элемента
-                nmpop = nm.name
-                # выделяем обж по индексу
-                obsl = bpy.data.objects[nmpop]
-                obsl.select = True
-                # делаем обж "активным"
-                bpy.context.scene.objects.active = bpy.data.objects[nmpop]
-                # показываем имя в окне вида и группируем по имени объекта
-                bpy.context.object.show_name = True
-                bpy.ops.group.create(name=nmpop)
-                print(nmpop)
-                # снимаем выделение
-                obsl.select = False
-            self.report({'INFO'}, "Created of many groups")
-        if self.gset2 != 'The list is empty':
-            for i in obj:
-                i.select = True
-                bpy.context.scene.objects.active = bpy.data.objects[i.name]
-                bpy.ops.object.group_link(group=self.gset2)
-            self.report({'INFO'}, "Created a total group: %s" % self.gset2)
-        if obj != [] and self.gset == 'Total group' and self.gset2 != "Select a group name":
-            nm2 = bpy.context.scene.objects.active.name
-            bpy.context.object.show_name = True
-            if self.gstr == '':
-                bpy.ops.group.create(name=nm2)
-                self.report({'INFO'}, "Created a public group: %s" % nm2)
+        if obj != []:
+            if self.gstr == '':  # И если сторка пустая
+                if self.gset == 'Many groups':
+                    # снять выделение со всего
+                    bpy.ops.object.select_all(action='TOGGLE')
+                    for i in range(len(obj)):  # цикл от длины списка
+                        if obj != None:
+                            # удалить значение по идексу
+                            nm = obj.pop(0)
+                        # получение имени выделенного элемента
+                        nmpop = nm.name
+                        # выделяем обж по индексу
+                        obsl = bpy.data.objects[nmpop]
+                        obsl.select = True
+                        # делаем обж "активным"
+                        bpy.context.scene.objects.active = bpy.data.objects[nmpop]
+                        # показываем имя в окне вида и группируем по имени объекта
+                        bpy.context.object.show_name = True
+                        bpy.ops.group.create(name=nmpop)
+                        print(nmpop)
+                        # снимаем выделение
+                        obsl.select = False
+                    self.report({'INFO'}, "Created of many groups")
+                # ДАЛЕЕ присоединие к указанной группе
+                if self.gset == 'Total group':
+                    if self.gset2 == "Select a group name" or self.gset2 == "The list is empty":
+                        nm2 = bpy.context.scene.objects.active.name
+                        bpy.context.object.show_name = True
+                        bpy.ops.group.create(name=nm2)
+                        self.report({'INFO'}, "Created a public group: %s" % nm2)
+                if self.gset2 != 'The list is empty' or self.gset2 != 'Select a group name':
+                    self.gstr = ''
+                    for i in obj:
+                        i.select = True
+                        bpy.context.scene.objects.active = bpy.data.objects[i.name]
+                        bpy.ops.object.group_link(group=self.gset2)
+                    self.report({'INFO'}, "Objects are attached to: %s" % self.gset2)
             else:
                 bpy.ops.group.create(name=self.gstr)
                 self.report({'INFO'}, "Created a total group: %s" % self.gstr)
-            # bpy.ops.script.python_file_run(filepath= p + "GruopForNameItems.py")
+        else:
+            self.report({'INFO'}, "There is no selected object")
         return {"FINISHED"}
     def invoke(self, context, event):
         global gets, gstr, gr0
