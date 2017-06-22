@@ -1,4 +1,4 @@
-﻿###!/usr/bin/env python
+###!/usr/bin/env python
 bl_info = {
     "name": "AUTO_S",
     "author": "Alex McKonst",
@@ -14,7 +14,8 @@ bl_info = {
 # -*- coding: utf-8 -*-
 import bpy
 import os
-from bpy.types import Panel, Menu
+from bpy.types import Panel, Menu, Group, GroupObjects
+from bpy import props
 
 
 p = "c:\\MY_SCRIPTS\\Auto\\Auto\\"
@@ -86,6 +87,7 @@ class Gradobj(bpy.types.Operator):
                         constraint_orientation='LOCAL')
         def dup3():
             """режим правки, дублировать, скайлить, переместить на величину скайла"""
+            #            bpy.ops.apply.transformscale()
             bpy.ops.object.editmode_toggle()
             bpy.ops.mesh.duplicate_move(MESH_OT_duplicate={"mode": 1}, TRANSFORM_OT_translate={"value": (-0, self.pr, 0),
                                                                                                "constraint_axis": (
@@ -108,9 +110,21 @@ class Gradobj(bpy.types.Operator):
             bpy.ops.transform.resize(value=(self.sz, self.sz, 1.0 if self.opc == 1 else self.sz),
                                      constraint_axis=(True, True, False if self.opc == 1 else True),
                                      constraint_orientation='LOCAL')
+            #            bpy.ops.apply.transformscale()
+            # print(ns)
+
+            # bpy.ops.transform.translate(value=(0, self.pr, 0),
+            #                             constraint_axis=(False, True, False),
+            #                             constraint_orientation='LOCAL')
             bpy.ops.object.editmode_toggle()
         # rotation mass
         if bpy.context.selected_objects != []:
+#            bpy.ops.transform.resize(value=(self.sz, self.sz, 1.0),
+#                        constraint_axis=(False, False, False),
+#                        constraint_orientation='LOCAL', mirror=False,
+#                        proportional='DISABLED', proportional_edit_falloff='SMOOTH',
+#                        proportional_size=1.1
+#                        )
             slo = bpy.context.selected_objects
             bpy.ops.transform.resize(value=(1+self.rsc, 1+self.rsc, 1), constraint_axis=(True, True, False), constraint_orientation='LOCAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=0.13513)
             bpy.ops.transform.rotate(value=self.rt, axis=(0, 0, 0), constraint_axis=(False, False, True), constraint_orientation='LOCAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.1, release_confirm=True)
@@ -713,17 +727,32 @@ class GruopForNameItems(bpy.types.Operator):
     bl_label = "GruopForNameItems"
     bl_options = {"REGISTER", "UNDO"}
 
+    def myfunc(self, d):
+        d=[(i.name, i.name, i.name) for i in list(bpy.data.groups)] if bpy.data.groups.items() != [] else [('The list is empty', 'The list is empty', 'The list is empty')]
+        if bpy.data.groups.items() != []:
+            d.append(('Select a group name', 'Select a group name', 'Select a group name'))
+        return d
     gset = bpy.props.EnumProperty(
         items=[('Total group', 'Total group', 'Total group'),
                ('Many groups', 'Many groups', 'Many groups')],
         name="Selcet Menu",
         description="Select a method for grouping",
         default='Total group')
+
     gstr = bpy.props.StringProperty(
         name="Name TotGroup",
         description="Enter the name of the 'Total group'",
         default=''
-    )
+        )
+    gset2 = bpy.props.EnumProperty(
+        items= myfunc,
+        name="Project Groups",
+        description="Select a group name",
+         )
+
+    def __init__(self):
+        if bpy.data.groups.items() != []:
+            self.gset2 = 'Select a group name'
     def execute(self, context):
         obj = bpy.context.selected_objects
         if obj == []:
@@ -733,7 +762,7 @@ class GruopForNameItems(bpy.types.Operator):
             bpy.ops.object.select_all(action='TOGGLE')
             for i in range(len(obj)):  # цикл от длины списка
                 if obj != None:
-                    # удалитьт значение по идексу
+                    # удалить значение по идексу
                     nm = obj.pop(0)
                 # получение имени выделенного элемента
                 nmpop = nm.name
@@ -749,7 +778,14 @@ class GruopForNameItems(bpy.types.Operator):
                 # снимаем выделение
                 obsl.select = False
             self.report({'INFO'}, "Created of many groups")
-        if obj != [] and self.gset == 'Total group':
+        if self.gset2 != 'The list is empty':
+            for i in obj:
+                i.select = True
+                bpy.context.scene.objects.active = bpy.data.objects[i.name]
+                bpy.ops.object.group_link(group=self.gset2)
+            self.report({'INFO'}, "Created a total group: %s" % self.gset2)
+        if obj != [] and self.gset == 'Total group' and self.gset2 == "Select a group name":
+
             nm2 = bpy.context.scene.objects.active.name
             bpy.context.object.show_name = True
             if self.gstr == '':
@@ -761,7 +797,7 @@ class GruopForNameItems(bpy.types.Operator):
             # bpy.ops.script.python_file_run(filepath= p + "GruopForNameItems.py")
         return {"FINISHED"}
     def invoke(self, context, event):
-        global gets, gstr
+        global gets, gstr, gr0
         return context.window_manager.invoke_props_dialog(self)
 
 #-----> """Name Items For Dupli Group Name"""
@@ -1442,7 +1478,41 @@ class Matrix(bpy.types.Operator):
 ##                    self.report({'INFO'}, "End of the list")
                         continue
         return {'FINISHED'}
-  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
+
+##class AsImag(bpy.types.Operator):
+##    """Save_scetch"""
+##    bl_idname = "scene.sceth"
+##    bl_label = "saveIMAGE"
+##    bl_options = {"REGISTER", "UNDO"}
+##
+##    apt = bpy.props.StringProperty(subtype='FILE_PATH',
+##        name="Floder",
+##        default = '')
+##    mtc = bpy.props.IntProperty(name = "Count", description = "Count", default = 4, min=2)
+##    mtx = bpy.props.FloatProperty(name="X", description="X", default=8.0, min = 0.0)
+##    mty = bpy.props.FloatProperty(name="Y", description="Y", default=10, min = 0.0)
+##    mtp = bpy.props.BoolProperty(name="Propotional", description="Propotional", default=True)
+##
+##    def execute(self, context):
+##        bpy.context.scene.render.image_settings.file_format = 'PNG'
+##        bpy.ops.image.save_as(save_as_render=False, copy=False, filepath="",
+##                check_existing=True, filter_blender=False, filter_backup=False,
+##                filter_image=True, filter_movie=True, filter_python=False,
+##                filter_font=False, filter_sound=False, filter_text=False,
+##                filter_btx=False, filter_collada=False, filter_alembic=False,
+##                filter_folder=True, filter_blenlib=False, filemode=9, relative_path=True,
+##                show_multiview=False, use_multiview=False, display_type='DEFAULT', sort_method='FILE_SORT_ALPHA')
+##
+##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
+##class My_AsImg(bpy.types.Panel):
+##    bl_label = "AsImg"
+##    bl_space_type = 'IMAGE_EDITOR'
+##    bl_region_type = 'UI'
+##
+##    def draw(self, context):
+##        layout = self.layout
+##        split = layout.split()
+##        split.prop(rd, "simplify_subdivision", text="Subdivision")
 
 class AUTPanel(bpy.types.Panel):
 
@@ -1690,5 +1760,5 @@ def unregister():
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
 
-if __name__ == "__main__":
-    register()
+##if __name__ == "__main__":
+##    register()
