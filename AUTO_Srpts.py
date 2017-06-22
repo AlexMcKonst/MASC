@@ -784,8 +784,7 @@ class GruopForNameItems(bpy.types.Operator):
                 bpy.context.scene.objects.active = bpy.data.objects[i.name]
                 bpy.ops.object.group_link(group=self.gset2)
             self.report({'INFO'}, "Created a total group: %s" % self.gset2)
-        if obj != [] and self.gset == 'Total group' and self.gset2 == "Select a group name":
-
+        if obj != [] and self.gset == 'Total group' and self.gset2 != "Select a group name":
             nm2 = bpy.context.scene.objects.active.name
             bpy.context.object.show_name = True
             if self.gstr == '':
