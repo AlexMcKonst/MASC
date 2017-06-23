@@ -2,8 +2,8 @@
 bl_info = {
     "name": "AUTO_S",
     "author": "Alex McKonst",
-    "version": (1, 7, 0),
-    "blender": (2, 77, 0),
+    "version": (1, 7, 6),
+    "blender": (2, 78, 0),
     "location": "Mesh",
     "description": "My Collection automate scripts",
     "warning": "WIP",
