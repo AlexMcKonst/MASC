@@ -233,7 +233,13 @@ class Crlwo(bpy.types.Operator):
     bl_label = "Curve Profile"
     bl_options = {"REGISTER", "UNDO"}
 
-
+    lnc2 = bpy.props.EnumProperty(
+        items=[('2Circle', '2Circle', '2Circle'),
+               ('FillCurve', 'FillCurve', 'FillCurve'),
+               ('Selcet', 'Selcet', 'Selcet')],
+        name="Select a method",
+        default='Selcet'
+    )
     bzc = bpy.props.FloatProperty(
         name="Inner diameter('Cyrcle')",
         description="inner_diameter",
@@ -246,12 +252,6 @@ class Crlwo(bpy.types.Operator):
         default=1,
         min=0.0
     )
-    lnc = bpy.props.BoolProperty(
-        name="2Circle",
-        description="2Circle",
-        default=0
-    )
-
     trcl = bpy.props.FloatProperty(
         name = "Move Circl 'X'",
         description = "TRANSFORM_OT_translate={"'value'":(self.trcl, 0, 0)",
@@ -261,11 +261,6 @@ class Crlwo(bpy.types.Operator):
         name="Algin View('Cyrcle')",
         description="view_align",
         default=False
-    )
-    flc = bpy.props.BoolProperty(
-        name = "FillCurve",
-        description = "FllCrv",
-        default = 0
     )
     cqv = bpy.props.EnumProperty(
         items = [('rhomb', 'rhomb', 'rhomb'),
@@ -328,10 +323,10 @@ class Crlwo(bpy.types.Operator):
                     spv = bpy.context.object.data.splines[0].bezier_points
                     tilt()
         if sel == [] and self.rd == 0:
-            self.flc = 0
+            self.lnc2 = 'Selcet'
             self.report({'INFO'}, "RING MODE 'ON': Not found the curves for editing.")
             self.rd = 1
-        if self.flc==0:
+        if self.lnc2=='Selcet' or self.lnc2=='2Circle':
             bpy.ops.curve.primitive_bezier_circle_add(
                 radius=CdR,
                 view_align=self.vwc)
@@ -341,8 +336,8 @@ class Crlwo(bpy.types.Operator):
                 bpy.context.object.data.bevel_resolution = 16 #self.brc
             else:
                 prof()
-        #            leenk = self.lnc:
-        while self.lnc==True and self.flc==0:
+        #            leenk = self.lnc2:
+        while self.lnc2=='2Circle':
             bpy.ops.object.duplicate_move_linked(OBJECT_OT_duplicate={"linked":True, "mode":'TRANSLATION'},
                                                  TRANSFORM_OT_translate={"value":(self.trcl, 0, 0), "constraint_axis":(True, False, False),
                                                                          "constraint_orientation":'LOCAL', "mirror":False, "proportional":'DISABLED',
@@ -354,11 +349,11 @@ class Crlwo(bpy.types.Operator):
                                      proportional_edit_falloff='SMOOTH', proportional_size=6.11584, release_confirm=True)
             break
 
-        if self.flc==1 and self.md == 0: # fill curve ON
+        if self.lnc2== "FillCurve" and self.md == 0: # fill curve ON
             self.report({'INFO'}, "CURE MODE 'ON'")
             selvert()
             self.md = 1
-        if bpy.context.active_object.type == 'CURVE' and self.flc==1:
+        if bpy.context.active_object.type == 'CURVE' and self.lnc2=="FillCurve":
             prof()
         return {"FINISHED"}
 
