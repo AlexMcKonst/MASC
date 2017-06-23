@@ -767,6 +767,8 @@ class GruopForNameItems(bpy.types.Operator):
         if obj != []:
             if self.gstr == '':  # И если сторка пустая
                 if self.gset == 'Many groups':
+                    if bpy.data.groups.items() != []:
+                        self.gset2='Select a group name'
                     # снять выделение со всего
                     bpy.ops.object.select_all(action='TOGGLE')
                     for i in range(len(obj)):  # цикл от длины списка
