@@ -1324,6 +1324,11 @@ class ExpS(bpy.types.Operator):
     bl_idname = "scene.expos"
     bl_label = "Export_STL"
     bl_options = {"REGISTER", "UNDO"}
+    def grp(self, g):
+        g = [(i.name, i.name, i.name) for i in bpy.context.active_object.users_group] if bpy.context.active_object.users_group != () else [('The list is empty', 'The list is empty', 'The list is empty')]
+        # if bpy.context.active_object.users_group != ():
+        #     g.append(('Select a group name', 'Select a group name', 'Select a group name'))
+        return g
 
     esg = bpy.props.BoolProperty(
         name="Use selection",
@@ -1336,13 +1341,9 @@ class ExpS(bpy.types.Operator):
                 ('Object_Name', 'Object_Name', 'Object_Name')],
         name="Use selection",
         default="Self")
-    elg = bpy.props.IntProperty(
-        name = "List of groups",
-        description = "Scroll through the index of the group",
-        default = 0,
-        min=0,
-        max=100
-        )
+    ell = bpy.props.EnumProperty(
+        items=grp,
+        name="Groups")
     enm = bpy.props.StringProperty(
         name="Name",
         default='')
@@ -1352,47 +1353,27 @@ class ExpS(bpy.types.Operator):
         default = '')
     erun = bpy.props.BoolProperty(
         name="RUN",
-        default=0)
+        default=0
+        )
 
     def execute(self, context):
         df = os.path.basename(bpy.data.filepath)
         act = bpy.context.active_object.name
         if self.esp == 'Group_Name':
-
-            if bpy.context.active_object.users_group != () and self.elg <= len(bpy.context.active_object.users_group)-1:
-                grp = bpy.context.active_object.users_group[self.elg].name
-#                grp = '('+grp +')'
-#                self.enm = '('+grp +')'
-                self.enm = grp
+            self.enm = ''
+            if self.ell != 'The list is empty':
+                self.enm = self.ell
             else:
-                if self.elg >= len(bpy.context.active_object.users_group):
-                    self.elg = len(bpy.context.active_object.users_group)
-                    self.report({'INFO'}, "End of 'list'")
-                if bpy.context.active_object.users_group == ():
-                    self.report({'INFO'}, "Group is '0'")
-
-  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
+                self.enm = ''
         if self.esp == 'Object_Name':
             self.enm = act
         if self.esp == '"File"(Group)':
-            if bpy.context.active_object.users_group != () and self.elg <= len(bpy.context.active_object.users_group)-1:
-                if self.enm == '':
-                    self.enm = df.replace('.blend', '') + '('+ bpy.context.active_object.users_group[self.elg-1].name +')'
-                else:
-                    if '('+ bpy.context.active_object.users_group[self.elg].name +')' not in self.enm:
-                        self.enm = self.enm + '('+ bpy.context.active_object.users_group[self.elg].name +')'
-            else:
-                if self.elg >= len(bpy.context.active_object.users_group):
-                    self.elg = len(bpy.context.active_object.users_group)
-                    self.report({'INFO'}, "End of 'list'")
-                if bpy.context.active_object.users_group == ():
-                    self.report({'INFO'}, "Group is '0'")
+            self.enm = ''
+            if self.ell != 'The list is empty':
+                self.enm = df.replace('.blend', '') + '(' + self.ell + ')'
+                # if bpy.context.active_object.users_group == ():
+                #     self.report({'INFO'}, "Group is '0'")
         if self.erun == 1:
-#            if self.enm != '' and os.path.basename(bpy.data.filepath) in (os.path.dirname(bpy.data.filepath) + '\\'+os.path.basename(bpy.data.filepath)):
-#                self.enm =self.enm.replace('(', '')
-#                self.enm =self.enm.replace(')', '')
-#                self.enm ='('+self.enm+')'
-
             if self.epth == '' and self.enm == '': # исключение: пустой путь
                 self.epth = os.path.dirname(bpy.data.filepath)+'\\'
                 self.enm = os.path.basename(bpy.data.filepath)
@@ -1406,12 +1387,6 @@ class ExpS(bpy.types.Operator):
                     self.epth = os.path.dirname(bpy.data.filepath).replace('.blend', '')+'\\'
                 if '.stl' in self.epth:
                     self.epth = os.path.dirname(bpy.data.filepath).replace('.stl', '')+'\\'
-##            if self.enm =='': # исключение: пустая строка
-##                self.enm = os.path.basename(bpy.data.filepath)
-##                if '.blend' in self.enm:
-##                    self.enm = os.path.basename(bpy.data.filepath).replace('.blend', '')
-##                if '.stl' in self.enm:
-##                    self.enm = os.path.basename(bpy.data.filepath).replace('.stl', '')
             if '//' in self.epth: # проверка на "//"
                 rep = self.epth.replace('//', '')
                 self.epth = os.path.dirname(bpy.data.filepath)+'\\'+rep
@@ -1425,9 +1400,6 @@ class ExpS(bpy.types.Operator):
             self.report({'INFO'}, "NAME %s PATH:%s" % (self.enm.replace('.blend', '') if self.enm !='' else '""', self.epth))
             self.erun = 0
         return {'FINISHED'}
-##    def invoke(self, context, event):
-##        global esg, esp, enm, epth
-##        return context.window_manager.invoke_props_dialog(self)
 
 class Matrix(bpy.types.Operator):
     """Organize objects"""
