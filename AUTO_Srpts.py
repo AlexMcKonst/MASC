@@ -1323,8 +1323,6 @@ class ExpS(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     def grp(self, g):
         g = [(i.name, i.name, i.name) for i in bpy.context.active_object.users_group] if bpy.context.active_object.users_group != () else [('The list is empty', 'The list is empty', 'The list is empty')]
-        # if bpy.context.active_object.users_group != ():
-        #     g.append(('Select a group name', 'Select a group name', 'Select a group name'))
         return g
 
     esg = bpy.props.BoolProperty(
@@ -1354,7 +1352,7 @@ class ExpS(bpy.types.Operator):
         )
 
     def execute(self, context):
-        df = os.path.basename(bpy.data.filepath)
+        df = os.path.splitext(os.path.basename(bpy.data.filepath))[0]
         act = bpy.context.active_object.name
         if self.esp == 'Group_Name':
             self.enm = ''
@@ -1367,29 +1365,17 @@ class ExpS(bpy.types.Operator):
         if self.esp == '"File"(Group)':
             self.enm = ''
             if self.ell != 'The list is empty':
-                self.enm = df.replace('.blend', '') + '(' + self.ell + ')'
-                # if bpy.context.active_object.users_group == ():
-                #     self.report({'INFO'}, "Group is '0'")
+                self.enm = df + '(' + self.ell + ')'
         if self.erun == 1:
-            if self.epth == '' and self.enm == '': # исключение: пустой путь
-                self.epth = os.path.dirname(bpy.data.filepath)+'\\'
-                self.enm = os.path.basename(bpy.data.filepath)
-                if '.blend' in self.enm:
-                    self.enm = os.path.basename(bpy.data.filepath).replace('.blend', '')
-                if '.stl' in self.enm:
-                    self.enm = os.path.basename(bpy.data.filepath).replace('.stl', '')
-            if '.stl' in self.epth or '.blend' in self.epth: # поиск по расширению и удаление его
-                self.enm = ''
-                if '.blend' in self.epth:
-                    self.epth = os.path.dirname(bpy.data.filepath).replace('.blend', '')+'\\'
-                if '.stl' in self.epth:
-                    self.epth = os.path.dirname(bpy.data.filepath).replace('.stl', '')+'\\'
+            if self.enm == '': # исключение: пустой путь
+                if self.epth == '':
+                    self.epth = os.path.dirname(bpy.data.filepath)+'\\'
+                    self.enm = df
+                else:
+                    self.enm = df
             if '//' in self.epth: # проверка на "//"
                 rep = self.epth.replace('//', '')
                 self.epth = os.path.dirname(bpy.data.filepath)+'\\'+rep
-            if self.epth.find(df): # убираем совпадение расширения
-                pt = self.epth.replace('.stl', '')
-                pt = self.epth.replace('.blend', '')
                 self.epth = pt # изаменяем строку оригинальнального пути
             bpy.ops.export_mesh.stl(filepath=self.epth+self.enm+'.stl', check_existing=True, axis_forward='Y', axis_up='Z',
                                 filter_glob="*.stl", use_selection=self.esg, global_scale=1, use_scene_unit=False,
