@@ -1,11 +1,11 @@
 ###!/usr/bin/env python
 bl_info = {
-    "name": "AUTO_S",
+    "name": "MASC",
     "author": "Alex McKonst",
-    "version": (1, 7, 6),
+    "version": (1, 7, 7),
     "blender": (2, 78, 0),
     "location": "Mesh",
-    "description": "My Collection automate scripts",
+    "description": "'MASC' is a set of scenarios for automating routine workflows and settings.",
     "warning": "WIP",
     "wiki_url": "",
     "tracker_url": "https://blenderartists.org/forum/showthread.php?417317-My_autos",
@@ -16,9 +16,6 @@ import bpy
 import os
 from bpy.types import Panel, Menu, Group, GroupObjects
 from bpy import props
-
-
-p = "c:\\MY_SCRIPTS\\Auto\\Auto\\"
 
 #-----> """Grading of objects""
 class Gradobj(bpy.types.Operator):
