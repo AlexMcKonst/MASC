@@ -1,9 +1,10 @@
-# My_autos
+# MASC
 
 Hello!
 
 I am 3D designer.
-I write code for my menu WIP "MY_AUTOS" with a collection of frequently used commands when working in Blender
+I write code for my menu [WIP] "MASC" with a collection of frequently used commands when working in Blender
+"MASC" is a set of scenarios for automating routine workflows and settings.
 
 ## 1) Seek and destroy.
 
