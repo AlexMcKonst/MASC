@@ -1479,7 +1479,7 @@ class Matrix(bpy.types.Operator):
 
 class AUTPanel(bpy.types.Panel):
 
-    bl_label = "AP"
+    bl_label = "MASC"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
 
