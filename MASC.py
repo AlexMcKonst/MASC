@@ -1313,10 +1313,22 @@ class ExpS(bpy.types.Operator):
     bl_idname = "scene.expos"
     bl_label = "Export_STL"
     bl_options = {"REGISTER", "UNDO"}
+
     def grp(self, g):
         g = [(i.name, i.name, i.name) for i in bpy.context.active_object.users_group] if bpy.context.active_object.users_group != () else [('The list is empty', 'The list is empty', 'The list is empty')]
         return g
-
+    def fldr(self, dr):
+        dr = [('Select folder', 'Select folder', 'Select folder')]
+        if os.path.dirname(bpy.data.filepath) !='':
+            for d, dirs, files in os.walk(os.path.dirname(bpy.data.filepath)):
+                for f in dirs:
+                    f = u'%s' % f
+                    d2 = (f, f, str(d+'\\'+f))
+                    dr.append(d2)
+            # print('dr', '\n')
+        # d0 = ('select', 'select', 'select')
+        # dr.append(d0)
+        return dr
     esg = bpy.props.BoolProperty(
         name="Use selection",
         default=True
@@ -1334,16 +1346,27 @@ class ExpS(bpy.types.Operator):
     enm = bpy.props.StringProperty(
         name="Name",
         default='')
-
     epth = bpy.props.StringProperty(subtype='FILE_PATH',
-        name="Floder",
+        name="FILE_PATH",
         default = '')
+    edir = bpy.props.EnumProperty(
+        items= fldr,
+        name="Folder"
+        )
     erun = bpy.props.BoolProperty(
         name="RUN",
         default=0
         )
-
     def execute(self, context):
+        def dikt(dt):  # словарь определения пути по имени папки
+            dik0 = {}
+            if os.path.dirname(bpy.data.filepath) != '':
+                for d, dirs, files in os.walk(os.path.dirname(bpy.data.filepath) + '\\'):
+                    for f in dirs:
+                        f = u'%s' % f
+                        dik0[f] = d
+                        # print(dik0)
+            return dik0.get(dt)
         df = os.path.splitext(os.path.basename(bpy.data.filepath))[0]
         act = bpy.context.active_object.name
         if self.esp == 'Group_Name':
@@ -1358,11 +1381,19 @@ class ExpS(bpy.types.Operator):
             self.enm = ''
             if self.ell != 'The list is empty':
                 self.enm = df + '(' + self.ell + ')'
+        try:
+            if self.fldr != 'Select folder':
+                self.epth = ''
+                self.epth = str(dikt(dt=self.edir))+ str(self.edir) + '\\'
+                print('path',  self.epth)
+        except UnicodeDecodeError:
+            self.epth == ''
         if self.erun == 1:
-            if self.enm == '': # исключение: пустой путь
-                if self.epth == '':
+            if self.enm == '':
+                if self.epth == '': # исключение: пустой путь
                     self.epth = os.path.dirname(bpy.data.filepath)+'\\'
                     self.enm = df
+                    print(self.epth)
                 else:
                     self.enm = df
             if '//' in self.epth: # проверка на "//"
@@ -1436,41 +1467,6 @@ class Matrix(bpy.types.Operator):
 ##                    self.report({'INFO'}, "End of the list")
                         continue
         return {'FINISHED'}
-
-##class AsImag(bpy.types.Operator):
-##    """Save_scetch"""
-##    bl_idname = "scene.sceth"
-##    bl_label = "saveIMAGE"
-##    bl_options = {"REGISTER", "UNDO"}
-##
-##    apt = bpy.props.StringProperty(subtype='FILE_PATH',
-##        name="Floder",
-##        default = '')
-##    mtc = bpy.props.IntProperty(name = "Count", description = "Count", default = 4, min=2)
-##    mtx = bpy.props.FloatProperty(name="X", description="X", default=8.0, min = 0.0)
-##    mty = bpy.props.FloatProperty(name="Y", description="Y", default=10, min = 0.0)
-##    mtp = bpy.props.BoolProperty(name="Propotional", description="Propotional", default=True)
-##
-##    def execute(self, context):
-##        bpy.context.scene.render.image_settings.file_format = 'PNG'
-##        bpy.ops.image.save_as(save_as_render=False, copy=False, filepath="",
-##                check_existing=True, filter_blender=False, filter_backup=False,
-##                filter_image=True, filter_movie=True, filter_python=False,
-##                filter_font=False, filter_sound=False, filter_text=False,
-##                filter_btx=False, filter_collada=False, filter_alembic=False,
-##                filter_folder=True, filter_blenlib=False, filemode=9, relative_path=True,
-##                show_multiview=False, use_multiview=False, display_type='DEFAULT', sort_method='FILE_SORT_ALPHA')
-##
-##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
-##class My_AsImg(bpy.types.Panel):
-##    bl_label = "AsImg"
-##    bl_space_type = 'IMAGE_EDITOR'
-##    bl_region_type = 'UI'
-##
-##    def draw(self, context):
-##        layout = self.layout
-##        split = layout.split()
-##        split.prop(rd, "simplify_subdivision", text="Subdivision")
 
 class AUTPanel(bpy.types.Panel):
 
