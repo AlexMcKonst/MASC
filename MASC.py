@@ -1383,14 +1383,14 @@ class ExpS(bpy.types.Operator):
                 self.enm = df + '(' + self.ell + ')'
         try:
             if self.fldr != 'Select folder':
-                self.epth = ''
-                self.epth = str(dikt(dt=self.edir))+ str(self.edir) + '\\'
+                # self.epth = ''
+                self.epth = str(dikt(dt=self.edir))+ '\\'+str(self.edir) + '\\'
                 print('path',  self.epth)
         except UnicodeDecodeError:
             self.epth == ''
         if self.erun == 1:
             if self.enm == '':
-                if self.epth == '': # исключение: пустой путь
+                if self.epth == '' or self.epth == 'NoneSelect folder\\': # исключение: пустой путь
                     self.epth = os.path.dirname(bpy.data.filepath)+'\\'
                     self.enm = df
                     print(self.epth)
