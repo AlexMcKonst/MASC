@@ -2,16 +2,14 @@
 bl_info = {
     "name": "MASC",
     "author": "Alex McKonst",
-    "version": (1, 7, 7),
-    "blender": (2, 78, 0),
+    "version": (1, 7, 9),
+    "blender": (2, 79, 0),
     "location": "Mesh",
     "description": "'MASC' is a set of scenarios for automating routine workflows and settings.",
     "warning": "WIP",
     "wiki_url": "",
     "tracker_url": "https://blenderartists.org/forum/showthread.php?417317-My_autos",
     "category": "UI"}
-
-# -*- coding: utf-8 -*-
 import bpy
 import os
 from bpy.types import Panel, Menu, Group, GroupObjects
@@ -78,7 +76,7 @@ class Gradobj(bpy.types.Operator):
                         constraint_orientation='LOCAL')
 #            bpy.ops.apply.transformscale()
             ns = bpy.data.objects[bpy.context.active_object.name].scale[0]
-            print(ns)
+            # print(ns)
             bpy.ops.transform.translate(value=(0, ns/self.pr, 0),
                         constraint_axis=(False, True, False),
                         constraint_orientation='LOCAL')
@@ -128,7 +126,7 @@ class Gradobj(bpy.types.Operator):
             zz = bpy.data.objects[slo[0].name].dimensions[2]
             for i in range(self.dp):
                 dup2()
-                print("SEL", len(slo))
+                # print("SEL", len(slo))
         else:
             self.report({'WARNING'}, "Please select an object for duplication!")
 
@@ -466,66 +464,99 @@ class changobj(bpy.types.Operator):
         #        bpy.ops.script.python_file_run(filepath = p + "ChangeActiveObj.py")
         return {"FINISHED"}
 
+
 #-----> """Join 1 object (objects) to the active object"""
 class AplyJion(bpy.types.Operator):
     """Join 1 object (objects) to the active object"""
     bl_idname = "scene.apjion"
-    bl_label = "aply_Join_locRot_Obj"
+    bl_label = "APLY(Join, locRot)"
     bl_options = {"REGISTER", "UNDO"}
 
     CMs = bpy.props.BoolProperty(
         name="ORIGIN_CENTER_OF_MASS",
-        description="CMs",
+        description="ORIGIN_CENTER_OF_MASS",
         default=0
         )
+
     def execute(self, context):
-        obj = bpy.context.selected_objects
-        obd = {i: obj[i] for i in range(len(obj))}
-        def sel(SEL):
-            import bmesh
-            """Here second seleted all vertex"""
-            bpy.ops.object.editmode_toggle()
-            mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-            for v in mesh.verts:
-                v.select = SEL
-            for v in mesh.edges:
-                v.select = SEL
-            for v in mesh.faces:
-                v.select = SEL
-            ## trigger viewport update
-            # bpy.context.scene.objects.active = bpy.context.scene.objects.active
-            bpy.ops.object.editmode_toggle()
+        # # CURVE BLOCK
+        # def selvert():
+        #     """Select all the vertices of the curve"""
+        #     spv = bpy.context.object.data.splines[0].bezier_points
+        #     for i in range(len(spv)):
+        #         spv[i].tilt = True
+        #         spv[i].select_control_point = True
+        #         spv[i].select_right_handle = True
+        # def tilt():
+        #     spv = bpy.context.object.data.splines[0].bezier_points
+        #     for i in range(len(spv)):
+        #         spv[i].tilt = 0
+        #         spv[i].tilt = 0
+        #         spv[i].tilt = 0
+        # # END))
+        if bpy.context.selected_objects != []:
+            obj = bpy.context.selected_objects
+            def actic(act):
+                for i in bpy.context.selected_objects:
+                    if i != act:
+                        bpy.context.scene.objects.active = i
+            def sel(SEL):
+                import bmesh
+                """Here second seleted all vertex"""
+                bpy.ops.object.editmode_toggle()
+                mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+                for v in mesh.verts:
+                    v.select = SEL
+                for v in mesh.edges:
+                    v.select = SEL
+                for v in mesh.faces:
+                    v.select = SEL
+                bpy.ops.object.editmode_toggle()
+            def joint():
+                for i in bpy.context.selected_objects:
+                    if i != bpy.context.scene.objects.active:
+                        nm = bpy.context.scene.objects.active.name
+                if len(obj) >= 2:                   
+                    sel(True)
+                    ##   Here first object made is active
+                    # bpy.context.scene.objects.active = obd[1]
+                    actic(bpy.context.scene.objects.active)
+                    sel(False)
+                    #     ##   Selected acive seconde object
+                    bpy.ops.object.make_links_data(type='MODIFIERS')
+                    actic(bpy.context.scene.objects.active)
+                    #     ##   object.join
+                    bpy.ops.object.join()
+                    #     ##    Edit mode del vertex
+                    bpy.ops.object.editmode_toggle()
+                    bpy.ops.mesh.delete(type='VERT')
+                    bpy.ops.object.editmode_toggle()
+                    bpy.context.object.name = nm
+                return
 
-        # >> > d = {i: jh[i] for i in range(len(jh))}
-        # >> > d
-        # {0: bpy.data.objects['Cube.000'], 1: bpy.data.objects['Cube.003']}
-        #
-        # >> > jh[0]
-        # bpy.data.objects['Cube.000']
-        if len(obj) >= 2:
-            sel(True)
-            ##   Here first object made is active
-            bpy.context.scene.objects.active = obd[1]
-            sel(False)
+            if len(obj) == 1: # single selected objct
+                act = bpy.context.selected_objects[0]
+                bpy.ops.view3d.snap_cursor_to_active()
+                # if bpy.context.scene.objects.active.type =='CURVE':
+                #     bpy.ops.curve.primitive_bezier_curve_add()
+                # else:
+                #     bpy.ops.mesh.primitive_cube_add()
+                bpy.ops.mesh.primitive_cube_add()
+                bpy.context.scene.objects.active = act
+                bpy.context.active_object.select = True
+                bpy.ops.object.make_links_data(type='MODIFIERS')
+                obj = bpy.context.selected_objects
+                actic(act) # change activ obj
+                joint() # join to second obj del selected vert
+                obj = []
+            if len(obj) == 2:
+                print('2obj')
+                joint()
 
-        #     # bpy.ops.mesh.select_all(action='TOGGLE')
-        #     ##   Selected acive seconde object
-            bpy.context.scene.objects.active = obd[0]
-        #
-        #     ##   object.join
-            bpy.ops.object.join()
-        #
-        #     ##    Edit mode del vertex
-            bpy.ops.object.editmode_toggle()
-            bpy.ops.mesh.delete(type='VERT')
-            bpy.ops.object.editmode_toggle()
-            bpy.context.object.name = obd[1].name
+            if len(bpy.context.selected_objects) < 2:
+                if self.CMs == 1:
+                    bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
 
-        if self.CMs == 1:
-            bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-
-
-        #bpy.ops.script.python_file_run(filepath = p + "AplyJoinLoc.py")
         return {"FINISHED"}
 
 #-----> """Sculpt"""
@@ -566,7 +597,7 @@ class SculptMyDint(bpy.types.Operator):
             bpy.data.brushes[B].strength = 0.5
             bpy.data.brushes[B].auto_smooth_factor = 0.6
             bpy.context.scene.tool_settings.unified_paint_settings.size = 40
-            bpy.context.scene.tool_settings.sculpt.constant_detail = 10
+            bpy.context.scene.tool_settings.sculpt.constant_detail_resolution = 10
 
         md = bpy.context.mode
         if md == 'OBJECT':
@@ -899,6 +930,15 @@ class Sacle_Nrml(bpy.types.Operator):
         return {"FINISHED"}
 
 #----->"""Bevel_0.2"""
+# def myEnum01(scn):
+#     bpy.types.Scene.MyEnum = bpy.props.EnumProperty(
+#         items=[('Eine', 'Un', 'One'),
+#                ('Zwei', 'Deux', 'Two'),
+#                ('Drei', 'Trois', 'Three')],
+#         name="Ziffer",
+#         default = 'Drei')
+#     return
+# myEnum01(bpy.context.scene)
 class BVLn2(bpy.types.Operator):
     """bevel(offset=0.2, segments=2)
     SELECT EDGE LOOP | | | | | | |
@@ -1315,15 +1355,18 @@ class ExpS(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def grp(self, g):
+        '''Gruops list'''
         g = [(i.name, i.name, i.name) for i in bpy.context.active_object.users_group] if bpy.context.active_object.users_group != () else [('The list is empty', 'The list is empty', 'The list is empty')]
         return g
     def fldr(self, dr):
+        '''Folder list'''
         dr = [('Select folder', 'Select folder', 'Select folder')]
         if os.path.dirname(bpy.data.filepath) !='':
             for d, dirs, files in os.walk(os.path.dirname(bpy.data.filepath)):
                 for f in dirs:
-                    f = u'%s' % f
-                    d2 = (f, f, str(d+'\\'+f))
+                    # f = u'%s' % f
+                    # d2 = (f, f, str(d+'\\'+f))
+                    d2 = (f, f, d+'\\'+f)
                     dr.append(d2)
             # print('dr', '\n')
         # d0 = ('select', 'select', 'select')
@@ -1363,7 +1406,7 @@ class ExpS(bpy.types.Operator):
             if os.path.dirname(bpy.data.filepath) != '':
                 for d, dirs, files in os.walk(os.path.dirname(bpy.data.filepath) + '\\'):
                     for f in dirs:
-                        f = u'%s' % f
+                        # f = r'%s' % f
                         dik0[f] = d
                         # print(dik0)
             return dik0.get(dt)
@@ -1388,23 +1431,27 @@ class ExpS(bpy.types.Operator):
                 print('path',  self.epth)
         except UnicodeDecodeError:
             self.epth == ''
-        if self.erun == 1:
-            if self.enm == '':
-                if self.epth == '' or self.epth == 'NoneSelect folder\\': # исключение: пустой путь
-                    self.epth = os.path.dirname(bpy.data.filepath)+'\\'
-                    self.enm = df
-                    print(self.epth)
-                else:
-                    self.enm = df
-            if '//' in self.epth: # проверка на "//"
-                rep = self.epth.replace('//', '')
-                self.epth = os.path.dirname(bpy.data.filepath)+'\\'+rep
-                # self.epth = pt # изаменяем строку оригинальнального пути
-            bpy.ops.export_mesh.stl(filepath=self.epth+self.enm+'.stl', check_existing=True, axis_forward='Y', axis_up='Z',
-                                filter_glob="*.stl", use_selection=self.esg, global_scale=1, use_scene_unit=False,
-                                ascii=False, use_mesh_modifiers=True, batch_mode='OFF')
-            self.report({'INFO'}, "NAME %s PATH:%s" % (self.enm.replace('.blend', '') if self.enm !='' else '""', self.epth))
-            self.erun = 0
+        
+            try:
+                if self.erun == 1:
+                        if self.enm == '':
+                        if self.epth == '' or self.epth == 'NoneSelect folder\\': # исключение: пустой путь
+                            self.epth = os.path.dirname(bpy.data.filepath)+'\\'
+                            self.enm = df
+                            print(self.epth)
+                        else:
+                            self.enm = df
+                    if '//' in self.epth: # проверка на "//"
+                        rep = self.epth.replace('//', '')
+                        self.epth = os.path.dirname(bpy.data.filepath)+'\\'+rep
+                        # self.epth = pt # изаменяем строку оригинальнального пути
+                    bpy.ops.export_mesh.stl(filepath=self.epth+self.enm+'.stl', check_existing=True, axis_forward='Y', axis_up='Z',
+                                        filter_glob="*.stl", use_selection=self.esg, global_scale=1, use_scene_unit=False,
+                                        ascii=False, use_mesh_modifiers=True, batch_mode='OFF')
+                    self.report({'INFO'}, "name   %s   patn:  %s" % (self.enm.replace('.blend', '') if self.enm !='' else '""', self.epth))
+                    self.erun = 0
+                except AttributeError:    
+                
         return {'FINISHED'}
 
 class Matrix(bpy.types.Operator):
@@ -1491,8 +1538,6 @@ class AUTPanel(bpy.types.Panel):
         self.layout.prop(view, "use_matcap", text="",
         icon='MATCAP_01' if  bpy.context.space_data.use_matcap == True else 'SOLID')
 
-#        rdm = 1
-#        bpy.context.space_data.matcap_icon = '0'+'%s' %rdm
 # SSAO
         view = context.space_data
         scene = context.scene
@@ -1608,6 +1653,7 @@ class AUTPanel(bpy.types.Panel):
                     col.operator("scene.expos", text='STL' , icon="EXPORT")
         if edm =='EDIT_CURVE' or tp == 'EMPTY':
             col = layout
+            col.operator("scene.sdup", text="SRCH", icon="MOD_ARRAY")
         if edm !='EDIT_MESH':
             if edm != 'SCULPT':
                 col.operator("scene.crlwo", text='CW' , icon="MESH_TORUS")
@@ -1618,12 +1664,13 @@ class AUTPanel(bpy.types.Panel):
             if tp != 'EMPTY':
                 col.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
                 row = layout.row(align=True)
-                col.operator("scene.sdup", text="SRCH", icon="MOD_ARRAY")
                 col.operator("scene.apjion", text="JO", icon="OBJECT_DATAMODE")
+                col.operator("scene.sdup", text="SRCH", icon="MOD_ARRAY")
             col.operator("scene.robject", text="Rot&Dub", icon="FORCE_VORTEX")
             if tp != 'EMPTY':
                 col.operator("scene.bup", text="BUP", icon="MOD_BEVEL")
 #-----> """Block EDIT_MESH"""
+        dft = [('123', '123')]
         if edm == 'EDIT_MESH':
             # split = layout.split(percentage=0.0, align=True)
             col.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
@@ -1666,6 +1713,11 @@ class AUTPanel(bpy.types.Panel):
 
         elif ob.dupli_type == 'GROUP':
             layout.prop(ob, "dupli_group", text="Group")
+        # scn = context.scene
+        # layout.prop(scn, 'MyEnum')
+        # if bpy.context.scene.MyEnum == 'Deux':
+        #     BVLnSingl()
+
 #-----> """End"""
 
 def register():
