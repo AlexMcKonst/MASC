@@ -1378,7 +1378,7 @@ class ExpS(bpy.types.Operator):
         )
     esp = bpy.props.EnumProperty(
         items = [('Self', 'Self', 'Self'),
-                ('"File"(Group)', '"File"(Group)', '"File"(Group)'),
+                ('"FileName"+(GroupName)', '"FileName"+(GroupName)', '"FileName"+(GroupName)'),
                 ('Group_Name', 'Group_Name', 'Group_Name'),
                 ('Object_Name', 'Object_Name', 'Object_Name')],
         name="Use selection",
@@ -1420,7 +1420,7 @@ class ExpS(bpy.types.Operator):
                 self.enm = ''
         if self.esp == 'Object_Name':
             self.enm = act
-        if self.esp == '"File"(Group)':
+        if self.esp == '"FileName"+(GroupName)':
             self.enm = ''
             if self.ell != 'The list is empty':
                 self.enm = df + '(' + self.ell + ')'
