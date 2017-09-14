@@ -778,9 +778,8 @@ class GruopForNameItems(bpy.types.Operator):
     gset2 = bpy.props.EnumProperty(
         items= myfunc,
         name="Existing groups",
-        description="Select groups from the project to join them",
+        description="Select groups from the project to join them"
         )
-
     def __init__(self):
         self.gstr =''
         if bpy.data.groups.items() != []:
@@ -813,14 +812,15 @@ class GruopForNameItems(bpy.types.Operator):
                         obsl.select = False
                     self.report({'INFO'}, "Created of many groups")
                 # ДАЛЕЕ присоединие к указанной группе
-                if self.gset == 'Total group':
+                elif self.gset == 'Total group':
                     if self.gset2 == "Select a group name" or self.gset2 == "The list is empty":
                         nm2 = bpy.context.scene.objects.active.name
                         bpy.context.object.show_name = True
                         bpy.ops.group.create(name=nm2)
                         self.report({'INFO'}, "Created a public group: %s" % nm2)
-                if self.gset2 != 'The list is empty' or self.gset2 != 'Select a group name':
+                elif self.gset2 != 'The list is empty' or self.gset2 != 'Select a group name':
                     self.gstr = ''
+                    self.gset = 'Total group'
                     for i in obj:
                         i.select = True
                         bpy.context.scene.objects.active = bpy.data.objects[i.name]
@@ -1763,5 +1763,5 @@ def unregister():
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
 
-##if __name__ == "__main__":
-##    register()
+#if __name__ == "__main__":
+#   register()
