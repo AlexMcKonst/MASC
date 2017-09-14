@@ -8,7 +8,7 @@ bl_info = {
     "description": "'MASC' is a set of scenarios for automating routine workflows and settings.",
     "warning": "WIP",
     "wiki_url": "",
-    "tracker_url": "https://blenderartists.org/forum/showthread.php?417317-My_autos",
+    "tracker_url": "https://github.com/AlexMcKonst/MASC",
     "category": "UI"}
 import bpy
 import os
@@ -1430,28 +1430,25 @@ class ExpS(bpy.types.Operator):
                 self.epth = str(dikt(dt=self.edir))+ '\\'+str(self.edir) + '\\'
                 print('path',  self.epth)
         except UnicodeDecodeError:
-            self.epth == ''
-        
-            try:
-                if self.erun == 1:
-                        if self.enm == '':
-                        if self.epth == '' or self.epth == 'NoneSelect folder\\': # исключение: пустой путь
-                            self.epth = os.path.dirname(bpy.data.filepath)+'\\'
-                            self.enm = df
-                            print(self.epth)
-                        else:
-                            self.enm = df
-                    if '//' in self.epth: # проверка на "//"
-                        rep = self.epth.replace('//', '')
-                        self.epth = os.path.dirname(bpy.data.filepath)+'\\'+rep
-                        # self.epth = pt # изаменяем строку оригинальнального пути
-                    bpy.ops.export_mesh.stl(filepath=self.epth+self.enm+'.stl', check_existing=True, axis_forward='Y', axis_up='Z',
-                                        filter_glob="*.stl", use_selection=self.esg, global_scale=1, use_scene_unit=False,
-                                        ascii=False, use_mesh_modifiers=True, batch_mode='OFF')
-                    self.report({'INFO'}, "name   %s   patn:  %s" % (self.enm.replace('.blend', '') if self.enm !='' else '""', self.epth))
-                    self.erun = 0
-                except AttributeError:    
-                
+            self.epth == ''        
+            if self.erun == 1:
+                if self.enm == '':
+                    if self.epth == '' or self.epth == 'NoneSelect folder\\': # исключение: пустой путь
+                        self.epth = os.path.dirname(bpy.data.filepath)+'\\'
+                        self.enm = df
+                        print(self.epth)
+                    else:
+                        self.enm = df
+            if '//' in self.epth: # проверка на "//"
+                rep = self.epth.replace('//', '')
+                self.epth = os.path.dirname(bpy.data.filepath)+'\\'+rep
+                # self.epth = pt # изаменяем строку оригинальнального пути
+            bpy.ops.export_mesh.stl(filepath=self.epth+self.enm+'.stl', check_existing=True, axis_forward='Y', axis_up='Z',
+                                filter_glob="*.stl", use_selection=self.esg, global_scale=1, use_scene_unit=False,
+                                ascii=False, use_mesh_modifiers=True, batch_mode='OFF')
+            self.report({'INFO'}, "name   %s   patn:  %s" % (self.enm.replace('.blend', '') if self.enm !='' else '""', self.epth))
+            self.erun = 0
+                    
         return {'FINISHED'}
 
 class Matrix(bpy.types.Operator):
