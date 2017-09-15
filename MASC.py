@@ -1378,7 +1378,7 @@ class ExpS(bpy.types.Operator):
         )
     esp = bpy.props.EnumProperty(
         items = [('Self', 'Self', 'Self'),
-                ('"FileName"+(GroupName)', '"FileName"+(GroupName)', '"FileName"+(GroupName)'),
+                ('"File"(Group)', '"File"(Group)', '"File"(Group)'),
                 ('Group_Name', 'Group_Name', 'Group_Name'),
                 ('Object_Name', 'Object_Name', 'Object_Name')],
         name="Use selection",
@@ -1420,7 +1420,7 @@ class ExpS(bpy.types.Operator):
                 self.enm = ''
         if self.esp == 'Object_Name':
             self.enm = act
-        if self.esp == '"FileName"+(GroupName)':
+        if self.esp == '"File"(Group)':
             self.enm = ''
             if self.ell != 'The list is empty':
                 self.enm = df + '(' + self.ell + ')'
@@ -1430,15 +1430,15 @@ class ExpS(bpy.types.Operator):
                 self.epth = str(dikt(dt=self.edir))+ '\\'+str(self.edir) + '\\'
                 print('path',  self.epth)
         except UnicodeDecodeError:
-            self.epth == ''        
-            if self.erun == 1:
-                if self.enm == '':
-                    if self.epth == '' or self.epth == 'NoneSelect folder\\': # исключение: пустой путь
-                        self.epth = os.path.dirname(bpy.data.filepath)+'\\'
-                        self.enm = df
-                        print(self.epth)
-                    else:
-                        self.enm = df
+            self.epth == ''
+        if self.erun == 1:
+            if self.enm == '':
+                if self.epth == '' or self.epth == 'NoneSelect folder\\': # исключение: пустой путь
+                    self.epth = os.path.dirname(bpy.data.filepath)+'\\'
+                    self.enm = df
+                    print(self.epth)
+                else:
+                    self.enm = df
             if '//' in self.epth: # проверка на "//"
                 rep = self.epth.replace('//', '')
                 self.epth = os.path.dirname(bpy.data.filepath)+'\\'+rep
@@ -1447,8 +1447,8 @@ class ExpS(bpy.types.Operator):
                                 filter_glob="*.stl", use_selection=self.esg, global_scale=1, use_scene_unit=False,
                                 ascii=False, use_mesh_modifiers=True, batch_mode='OFF')
             self.report({'INFO'}, "name   %s   patn:  %s" % (self.enm.replace('.blend', '') if self.enm !='' else '""', self.epth))
-            self.erun = 0
-                    
+            self.erun = 0    
+                
         return {'FINISHED'}
 
 class Matrix(bpy.types.Operator):
@@ -1763,5 +1763,5 @@ def unregister():
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
 
-#if __name__ == "__main__":
-#   register()
+if __name__ == "__main__":
+   register()
