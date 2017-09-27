@@ -757,8 +757,8 @@ class GruopForNameItems(bpy.types.Operator):
         return d
 
     gset = bpy.props.EnumProperty(
-        items=[('Total group', 'Total group', 'Total group'),
-               ('Many groups', 'Many groups', 'Many groups')],
+        items=[('Total group', 'Total group', 'Total group'), # все элементы собираются в общую группу с именем активного объекта
+               ('Many groups', 'Many groups', 'Many groups')], # Каждый элемент в отдельную группу под своим именем
         name="Grouping method",
         description="Select a method for grouping",
         default='Total group')
@@ -771,12 +771,12 @@ class GruopForNameItems(bpy.types.Operator):
         # s = {'ANIMATABLE'}
         # return s
     gstr = bpy.props.StringProperty(
-        name="Any Name",
+        name="Any Name", # любое имя
         description="Enter the name of the 'Total group'.\nBy default, the group takes the name of the active object",
         default=''
         )
     gset2 = bpy.props.EnumProperty(
-        items= myfunc,
+        items= myfunc, # список групп проекта
         name="Existing groups",
         description="Select groups from the project to join them"
         )
@@ -792,6 +792,7 @@ class GruopForNameItems(bpy.types.Operator):
                     if bpy.data.groups.items() != []:
                         self.gset2='Select a group name'
                     # снять выделение со всего
+                    self.gstr = ''
                     bpy.ops.object.select_all(action='TOGGLE')
                     for i in range(len(obj)):  # цикл от длины списка
                         if obj != None:
@@ -812,20 +813,24 @@ class GruopForNameItems(bpy.types.Operator):
                         obsl.select = False
                     self.report({'INFO'}, "Created of many groups")
                 # ДАЛЕЕ присоединие к указанной группе
-                elif self.gset == 'Total group':
+                if self.gset == 'Total group':
                     if self.gset2 == "Select a group name" or self.gset2 == "The list is empty":
                         nm2 = bpy.context.scene.objects.active.name
                         bpy.context.object.show_name = True
                         bpy.ops.group.create(name=nm2)
                         self.report({'INFO'}, "Created a public group: %s" % nm2)
-                elif self.gset2 != 'The list is empty' or self.gset2 != 'Select a group name':
-                    self.gstr = ''
-                    self.gset = 'Total group'
-                    for i in obj:
-                        i.select = True
-                        bpy.context.scene.objects.active = bpy.data.objects[i.name]
+                    else:
                         bpy.ops.object.group_link(group=self.gset2)
-                    self.report({'INFO'}, "Objects are attached to: %s" % self.gset2)
+                        # bpy.ops.group.create(name=self.gset2)
+                        self.report({'INFO'}, "Created a public group: %s" % self.gset2)
+                # if self.gset2 != 'The list is empty' or self.gset2 != 'Select a group name':
+                #     self.gstr = ''
+                #     self.gset = 'Total group'
+                #     for i in obj:
+                #         i.select = True
+                #         bpy.context.scene.objects.active = bpy.data.objects[i.name]
+                #         bpy.ops.object.group_link(group=self.gset2)
+                #     self.report({'INFO'}, "Objects are attached to: %s" % self.gset2)
             else:
                 bpy.ops.group.create(name=self.gstr)
                 self.report({'INFO'}, "Created a total group: %s" % self.gstr)
