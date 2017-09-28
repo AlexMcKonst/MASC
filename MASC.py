@@ -14,6 +14,7 @@ import bpy
 import os
 from bpy.types import Panel, Menu, Group, GroupObjects
 from bpy import props
+from bpy.props import *
 
 #-----> """Grading of objects""
 class Gradobj(bpy.types.Operator):
@@ -1333,26 +1334,44 @@ class SDUP(bpy.types.Operator):
         global Lc, LRt
         return context.window_manager.invoke_props_dialog(self)
 
+#-----> """ListMC"""
+bpy.types.Object.my_red = IntProperty(
+        name = "Matcap list", default = 1, 
+        min = 1, max = 24)
 class List(bpy.types.Operator):
     """List"""
     bl_idname = "scene.lstmc"
     bl_label = "ListMC"
-    bl_options = {"REGISTER", "UNDO"}
+    # bl_options = {"REGISTER", "UNDO"}
 
-    nr = bpy.props.IntProperty(
-        name = "List",
-        description = "lst",
-        default = 1,
-        min=1,
-        max=24
-        )
-    def execute(self, context):
-        if self.nr >= 10:
-            bpy.context.space_data.matcap_icon = '%s' %self.nr
-        else:
-            bpy.context.space_data.matcap_icon = '0'+'%s' %self.nr
-        return {"FINISHED"}
-
+    # nr = bpy.props.IntProperty(
+    #     name = "List",
+    #     description = "lst",
+    #     default = 1,
+    #     min=1,
+    #     max=24
+    #     )
+    @classmethod
+    def poll(self, context):
+        if bpy.context.space_data.use_matcap == True:
+            def lM(lst):
+                LM=bpy.context.object.my_red
+                if LM >= 10:
+                    bpy.context.space_data.matcap_icon = '%s' %LM
+                else:
+                    bpy.context.space_data.matcap_icon = '0'+'%s' %LM
+                return
+            lM(bpy.context.scene)
+            print('poll ListMC')
+                # return len(context.object.data.materials)
+    
+    # def execute(self, context):
+    #     if self.nr >= 10:
+    #         bpy.context.space_data.matcap_icon = '%s' %self.my_red
+    #     else:
+    #         bpy.context.space_data.matcap_icon = '0'+'%s' %self.my_red
+    #     return {"FINISHED"}
+#-----> """Export_STL"""
 class ExpS(bpy.types.Operator):
     """The export button to the "STL" format"""
     bl_idname = "scene.expos"
@@ -1456,6 +1475,7 @@ class ExpS(bpy.types.Operator):
                 
         return {'FINISHED'}
 
+#-----> """ORGANIZER"""
 class Matrix(bpy.types.Operator):
     """Organize objects"""
     bl_idname = "scene.mtrx"
@@ -1563,7 +1583,10 @@ class AUTPanel(bpy.types.Panel):
             col.prop(rd, "simplify_subdivision", text="Subdivision")
             col = split.column(align=False)
         if  bpy.context.space_data.use_matcap == True:
+            ob = context.active_object
+            # ob = context.object.mode
             col.operator("scene.lstmc", text="MatCap")
+            layout.prop(ob, "my_red")
 #        if bpy.context.scene.render.use_simplify == True:
         #-----> """WIRE_ZONE"""
         layout = self.layout
@@ -1715,12 +1738,6 @@ class AUTPanel(bpy.types.Panel):
 
         elif ob.dupli_type == 'GROUP':
             layout.prop(ob, "dupli_group", text="Group")
-        # scn = context.scene
-        # layout.prop(scn, 'MyEnum')
-        # if bpy.context.scene.MyEnum == 'Deux':
-        #     BVLnSingl()
-
-#-----> """End"""
 
 def register():
     bpy.utils.register_class(Matrix)
