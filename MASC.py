@@ -2,7 +2,7 @@
 bl_info = {
     "name": "MASC",
     "author": "Alex McKonst",
-    "version": (1, 7, 9),
+    "version": (1, 7, 10),
     "blender": (2, 79, 0),
     "location": "Mesh",
     "description": "'MASC' is a set of scenarios for automating routine workflows and settings.",
@@ -821,9 +821,15 @@ class GruopForNameItems(bpy.types.Operator):
                         bpy.ops.group.create(name=nm2)
                         self.report({'INFO'}, "Created a public group: %s" % nm2)
                     else:
-                        bpy.ops.object.group_link(group=self.gset2)
+                        # bpy.ops.object.group_link(group=self.gset2)
                         # bpy.ops.group.create(name=self.gset2)
-                        self.report({'INFO'}, "Created a public group: %s" % self.gset2)
+                        self.gstr = ''
+                        self.gset = 'Total group'
+                        for i in obj:
+                            i.select = True
+                            bpy.context.scene.objects.active = bpy.data.objects[i.name]
+                            bpy.ops.object.group_link(group=self.gset2)
+                        self.report({'INFO'}, "Objects are attached to: %s" % self.gset2)
                 # if self.gset2 != 'The list is empty' or self.gset2 != 'Select a group name':
                 #     self.gstr = ''
                 #     self.gset = 'Total group'
@@ -1335,14 +1341,24 @@ class SDUP(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
 #-----> """ListMC"""
-bpy.types.Object.my_red = IntProperty(
-        name = "Matcap list", default = 1, 
-        min = 1, max = 24)
+# bpy.types.view3d.mycap = IntProperty(
+#         name = "Matcap list",
+#         min = 1, max = 24)
+# bpy.types.Object.my_red = IntProperty(
+#         name = "Matcap list",
+#         min = 1, max = 24)
+
+bpy.types.Scene.ListMCScene = IntProperty(
+        name = "MatCap List", 
+        description = "ListMCScene",
+        default = 1,
+        min = 1, max = 24
+        )
 class List(bpy.types.Operator):
     """List"""
     bl_idname = "scene.lstmc"
     bl_label = "ListMC"
-    # bl_options = {"REGISTER", "UNDO"}
+    bl_options = {"REGISTER", "UNDO"}
 
     # nr = bpy.props.IntProperty(
     #     name = "List",
@@ -1353,24 +1369,33 @@ class List(bpy.types.Operator):
     #     )
     @classmethod
     def poll(self, context):
-        if bpy.context.space_data.use_matcap == True:
-            def lM(lst):
-                LM=bpy.context.object.my_red
-                if LM >= 10:
-                    bpy.context.space_data.matcap_icon = '%s' %LM
-                else:
-                    bpy.context.space_data.matcap_icon = '0'+'%s' %LM
-                return
-            lM(bpy.context.scene)
-            print('poll ListMC')
-                # return len(context.object.data.materials)
-    
+      if bpy.context.space_data.use_matcap == True:
+        LM=bpy.context.scene['ListMCScene']
+        if LM >= 10:
+            bpy.context.space_data.matcap_icon = '%s' %LM
+        else:
+            bpy.context.space_data.matcap_icon = '0'+'%s' %LM
+      return
+    # @classmethod
+    # def poll(self, context):
+    #     if bpy.context.space_data.use_matcap == True:
+    #         def lM(lst):
+    #             LM=bpy.context.object.my_red
+    #             if LM >= 10:
+    #                 bpy.context.space_data.matcap_icon = '%s' %LM
+    #             else:
+    #                 bpy.context.space_data.matcap_icon = '0'+'%s' %LM
+    #             return
+    #         lM(bpy.context.scene)
+    #         # print('poll ListMC')
+    #             return len(context.object.data.materials)
     # def execute(self, context):
     #     if self.nr >= 10:
-    #         bpy.context.space_data.matcap_icon = '%s' %self.my_red
+    #         bpy.context.space_data.matcap_icon = '%s' %self.nr
     #     else:
-    #         bpy.context.space_data.matcap_icon = '0'+'%s' %self.my_red
+    #         bpy.context.space_data.matcap_icon = '0'+'%s' %self.nr
     #     return {"FINISHED"}
+
 #-----> """Export_STL"""
 class ExpS(bpy.types.Operator):
     """The export button to the "STL" format"""
@@ -1557,8 +1582,9 @@ class AUTPanel(bpy.types.Panel):
         self.layout.prop(view, "show_only_render", text="",
         icon='RESTRICT_VIEW_OFF' if bpy.context.space_data.show_only_render == True else 'RESTRICT_VIEW_ON'
         )
+
         self.layout.prop(view, "use_matcap", text="",
-        icon='MATCAP_01' if  bpy.context.space_data.use_matcap == True else 'SOLID')
+        icon='MATCAP_%s' % bpy.context.space_data.matcap_icon if  bpy.context.space_data.use_matcap == True else 'MATCAP_01')
 
 # SSAO
         view = context.space_data
@@ -1583,10 +1609,8 @@ class AUTPanel(bpy.types.Panel):
             col.prop(rd, "simplify_subdivision", text="Subdivision")
             col = split.column(align=False)
         if  bpy.context.space_data.use_matcap == True:
-            ob = context.active_object
-            # ob = context.object.mode
-            col.operator("scene.lstmc", text="MatCap")
-            layout.prop(ob, "my_red")
+            scn = context.scene
+            col.prop(scn, 'ListMCScene')
 #        if bpy.context.scene.render.use_simplify == True:
         #-----> """WIRE_ZONE"""
         layout = self.layout
@@ -1738,6 +1762,14 @@ class AUTPanel(bpy.types.Panel):
 
         elif ob.dupli_type == 'GROUP':
             layout.prop(ob, "dupli_group", text="Group")
+        if  bpy.context.space_data.use_matcap == True:
+            layout.operator("scene.lstmc", text="MatCap")
+        # scn = context.scene
+        # layout.prop(scn, 'MyEnum')
+        # if bpy.context.scene.MyEnum == 'Deux':
+        #     BVLnSingl()
+
+#-----> """End"""
 
 def register():
     bpy.utils.register_class(Matrix)
