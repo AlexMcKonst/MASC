@@ -1722,7 +1722,6 @@ class AUTPanel(bpy.types.Panel):
             if tp != 'EMPTY':
                 col.operator("scene.bup", text="BUP", icon="MOD_BEVEL")
 #-----> """Block EDIT_MESH"""
-        dft = [('123', '123')]
         if edm == 'EDIT_MESH':
             # split = layout.split(percentage=0.0, align=True)
             col.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
@@ -1771,7 +1770,6 @@ class AUTPanel(bpy.types.Panel):
 def register():
     bpy.utils.register_class(Matrix)
     bpy.utils.register_class(ExpS)
-    # bpy.utils.register_class(List)
     bpy.utils.register_class(SDUP)
     bpy.utils.register_class(Crlwo)
     bpy.utils.register_class(Robject)
@@ -1810,7 +1808,6 @@ def unregister():
     bpy.utils.unregister_class(Robject)
     bpy.utils.unregister_class(Crlwo)
     bpy.utils.unregister_class(SDUP)
-    # bpy.utils.unregister_class(List)
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
 
