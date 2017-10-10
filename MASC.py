@@ -16,6 +16,47 @@ from bpy.types import Panel, Menu, Group, GroupObjects
 from bpy import props
 from bpy.props import *
 
+def fstrd(self, context):
+    bpy.context.space_data.pivot_point = 'ACTIVE_ELEMENT'
+    for i in range(int(bpy.context.scene.fastrnd)):
+        import math
+        bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked": True, "mode": 'TRANSLATION'},
+                                      TRANSFORM_OT_translate={"value": (0, 0, 0),
+                                                              "constraint_axis": (False, False, False),
+                                                              "constraint_orientation": 'LOCAL', "mirror": False,
+                                                              "proportional": 'DISABLED',
+                                                              "proportional_edit_falloff": 'SMOOTH',
+                                                              "proportional_size": 2.48857, "snap": False,
+                                                              "snap_target": 'CLOSEST', "snap_point": (0, 0, 0),
+                                                              "snap_align": False, "snap_normal": (0, 0, 0),
+                                                              "gpencil_strokes": False, "texture_space": False,
+                                                              "remove_on_cancel": False, "release_confirm": False})
+
+##            bpy.ops.transform.translate(value=(self.rmx, self.rmy, 0), constraint_axis=(True, True, False), constraint_orientation='GLOBAL' if self.drot == 0 else 'LOCAL', mirror=False, proportional='DISABLED', proportional_edit_falloff='SPHERE', proportional_size=2.14359)
+        bpy.ops.transform.rotate(value=(math.radians(360)/int(bpy.context.scene.fastrnd)),
+        axis=(0, 0, 1),
+        constraint_axis=(False, False,True),
+            constraint_orientation='LOCAL',
+            mirror=False, proportional='DISABLED',
+            proportional_edit_falloff='SPHERE',
+            proportional_size=2.14359, release_confirm=True
+        )
+        bpy.context.selected_objects
+    bpy.ops.object.delete(use_global=False)
+#        bpy.data.objects[self.robj.name].select = True
+#        bpy.context.scene.objects.active = self.robj
+    return {"FINISHED"}
+
+bpy.types.Scene.fastrnd = bpy.props.EnumProperty(name ='',
+    description = 'Fast Rot&Dub',
+    items=[
+    ('2','2','2'),
+    ('3','3','3'),
+    ('4','4','4'),
+    ('5','5','5'),
+    ('6','6','6')], 
+    update=fstrd)
+
 #-----> """Grading of objects""
 class Gradobj(bpy.types.Operator):
     """Graduation"""
@@ -1609,8 +1650,7 @@ class AUTPanel(bpy.types.Panel):
             col.prop(rd, "simplify_subdivision", text="Subdivision")
             col = split.column(align=False)
         if  bpy.context.space_data.use_matcap == True:
-            scn = context.scene
-            col.prop(scn, 'ListMCScene')
+            col.prop(scene, 'ListMCScene')
 #        if bpy.context.scene.render.use_simplify == True:
         #-----> """WIRE_ZONE"""
         layout = self.layout
@@ -1715,7 +1755,10 @@ class AUTPanel(bpy.types.Panel):
                 row = layout.row(align=True)
                 col.operator("scene.apjion", text="JO", icon="OBJECT_DATAMODE")
                 col.operator("scene.sdup", text="SRCH", icon="MOD_ARRAY")
-            col.operator("scene.robject", text="Rot&Dub", icon="FORCE_VORTEX")
+            subcol = col.row(align=True)
+            subcol.operator("scene.robject", text="Rot&Dub", icon="FORCE_VORTEX")
+            subcol.prop(scene, 'fastrnd')
+
             if tp != 'EMPTY':
                 col.operator("scene.bup", text="BUP", icon="MOD_BEVEL")
 #-----> """Block EDIT_MESH"""
@@ -1764,10 +1807,6 @@ class AUTPanel(bpy.types.Panel):
             layout.prop(ob, "dupli_group", text="Group")
         if  bpy.context.space_data.use_matcap == True:
             layout.operator("scene.lstmc", text="MatCap")
-        # scn = context.scene
-        # layout.prop(scn, 'MyEnum')
-        # if bpy.context.scene.MyEnum == 'Deux':
-        #     BVLnSingl()
 
 #-----> """End"""
 
