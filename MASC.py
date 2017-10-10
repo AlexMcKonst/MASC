@@ -1381,61 +1381,22 @@ class SDUP(bpy.types.Operator):
         global Lc, LRt
         return context.window_manager.invoke_props_dialog(self)
 
-#-----> """ListMC"""
-# bpy.types.view3d.mycap = IntProperty(
-#         name = "Matcap list",
-#         min = 1, max = 24)
-# bpy.types.Object.my_red = IntProperty(
-#         name = "Matcap list",
-#         min = 1, max = 24)
+def listmatcap(self, context):
+    if bpy.context.space_data.use_matcap == True:
+        LM=bpy.context.scene.ListMCScene
+        if LM >= 10:
+            bpy.context.space_data.matcap_icon = '%s' %LM
+        else:
+            bpy.context.space_data.matcap_icon = '0'+'%s' %LM
+    return
 
 bpy.types.Scene.ListMCScene = IntProperty(
         name = "MatCap List", 
         description = "ListMCScene",
         default = 1,
-        min = 1, max = 24
+        min = 1, max = 24,
+        update = listmatcap
         )
-class List(bpy.types.Operator):
-    """List"""
-    bl_idname = "scene.lstmc"
-    bl_label = "ListMC"
-    bl_options = {"REGISTER", "UNDO"}
-
-    # nr = bpy.props.IntProperty(
-    #     name = "List",
-    #     description = "lst",
-    #     default = 1,
-    #     min=1,
-    #     max=24
-    #     )
-    @classmethod
-    def poll(self, context):
-      if bpy.context.space_data.use_matcap == True:
-        LM=bpy.context.scene['ListMCScene']
-        if LM >= 10:
-            bpy.context.space_data.matcap_icon = '%s' %LM
-        else:
-            bpy.context.space_data.matcap_icon = '0'+'%s' %LM
-      return
-    # @classmethod
-    # def poll(self, context):
-    #     if bpy.context.space_data.use_matcap == True:
-    #         def lM(lst):
-    #             LM=bpy.context.object.my_red
-    #             if LM >= 10:
-    #                 bpy.context.space_data.matcap_icon = '%s' %LM
-    #             else:
-    #                 bpy.context.space_data.matcap_icon = '0'+'%s' %LM
-    #             return
-    #         lM(bpy.context.scene)
-    #         # print('poll ListMC')
-    #             return len(context.object.data.materials)
-    # def execute(self, context):
-    #     if self.nr >= 10:
-    #         bpy.context.space_data.matcap_icon = '%s' %self.nr
-    #     else:
-    #         bpy.context.space_data.matcap_icon = '0'+'%s' %self.nr
-    #     return {"FINISHED"}
 
 #-----> """Export_STL"""
 class ExpS(bpy.types.Operator):
@@ -1644,14 +1605,6 @@ class AUTPanel(bpy.types.Panel):
 #        layout.active = rd.use_simplify
         split = layout.split()
         col = split.column()
-        if bpy.context.scene.render.use_simplify == True:
-            if bpy.context.space_data.use_matcap != True:
-                col = layout
-            col.prop(rd, "simplify_subdivision", text="Subdivision")
-            col = split.column(align=False)
-        if  bpy.context.space_data.use_matcap == True:
-            col.prop(scene, 'ListMCScene')
-#        if bpy.context.scene.render.use_simplify == True:
         #-----> """WIRE_ZONE"""
         layout = self.layout
         obj = bpy.context.object
@@ -1703,6 +1656,13 @@ class AUTPanel(bpy.types.Panel):
         slct = bpy.context.selected_objects
         edm = bpy.context.mode
         ob = context.object
+        if bpy.context.scene.render.use_simplify == True:
+            # if bpy.context.space_data.use_matcap != True:
+            #     col = layout
+            row.prop(rd, "simplify_subdivision", text="Subdivision")
+            # col = split.column(align=False)
+        if  bpy.context.space_data.use_matcap == True:
+            row.prop(scene, 'ListMCScene')
         if edm != 'SCULPT':
             col.operator("scene.autorend", text="RL", icon="RENDERLAYERS")
             col = split.column(align=True)
@@ -1805,15 +1765,13 @@ class AUTPanel(bpy.types.Panel):
 
         elif ob.dupli_type == 'GROUP':
             layout.prop(ob, "dupli_group", text="Group")
-        if  bpy.context.space_data.use_matcap == True:
-            layout.operator("scene.lstmc", text="MatCap")
-
+        
 #-----> """End"""
 
 def register():
     bpy.utils.register_class(Matrix)
     bpy.utils.register_class(ExpS)
-    bpy.utils.register_class(List)
+    # bpy.utils.register_class(List)
     bpy.utils.register_class(SDUP)
     bpy.utils.register_class(Crlwo)
     bpy.utils.register_class(Robject)
@@ -1852,7 +1810,7 @@ def unregister():
     bpy.utils.unregister_class(Robject)
     bpy.utils.unregister_class(Crlwo)
     bpy.utils.unregister_class(SDUP)
-    bpy.utils.unregister_class(List)
+    # bpy.utils.unregister_class(List)
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
 
