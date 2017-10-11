@@ -1268,65 +1268,64 @@ class B_UP(bpy.types.Operator):
         return {"FINISHED"}
 
 #-----> """Select_Dupli"""
-class SDUP(bpy.types.Operator):
-    """Select_Dupli"""
-    bl_idname = "scene.sdup"
-    bl_label = "SDUP MENU"
-    bl_options = {"REGISTER", "UNDO"}
+def srchs(self, context):
+    NULL = {}  # выдаёт случайный порядок ключей
+    sel = bpy.context.selected_objects  # список выделенных обьектов
+    bpy.ops.object.select_all(action='TOGGLE')  #
+    #name_NULL = []
+    for i in range(len(sel)):
+        sel[i].select = True
+        seloc = sel[i].location.to_tuple(1)  # Coord_locaton
+        el = sel[i].rotation_euler # Coord_Rotation
+        selrot = el[0], el[1], el[2]  # -------
+        dt = {'loc': str(seloc), 'rot': str(selrot)}  # dict
+        sel[i].select = False
+        NULL[str(sel[i].name)] = dt
+        #name_NULL.append(str(sel[i].name))
+##        print('\n\n')
+    dupli = {}
+    # print(NULL)
+    ig = ( )
+    for i in NULL:  # выбираем один элемент из "главного" списка(1действие)
+        bc = NULL.copy()  # копия "главного" словаря
+        it = NULL[i]  # получение значения ключа "главного" списка
+        # print(i)
+        del bc[i]  # # удаление ключа("самого себя")"i". можно bc.pop(i)
+        for k in bc:  # выбираем один элемент из копии "главного" списка(n-действий)
+            if not dupli.get(k):
+                itc = bc[k]  # получение значения ключа оригинального списка
+                if it == itc:  # сравнение списков
+                    # print('i',i)
+                    dupli[i] = NULL[i]  # одно действие
+    def locrot(): # функция выделения
+        for i in dupli:
+            # dupli[i]
+            bpy.data.objects[i].select = True
 
-    # dmv = bpy.props.BoolProperty(
-    #     name = "move",
-    #     description = "move",
-    #     default = 0
-    # )
-    # dinv = bpy.props.BoolProperty(
-    #     name="Invert_select",
-    #     description="invsel",
-    #     default=0
-    # )
-    Lc = bpy.props.EnumProperty(
-        items=[('LOCAL', 'LOCAL', 'Location of the objectL'),
-               ('LOCAL_ROTATE', 'LOCAL_ROTATE', 'Location of the object & Rotation in Eulers')],
-        name = "Search parameter",
-        description = "Location of the object\n& Rotation in Eulers",
-        default = 'LOCAL'
-        )
-
-    def execute(self, context):
-        NULL = {}  # выдаёт случайный порядок ключей
-        sel = bpy.context.selected_objects  # список выделенных обьектов
-        bpy.ops.object.select_all(action='TOGGLE')  #
-        #name_NULL = []
+    def loca():
+        single = []  # не дублируемые обьекты
+        coord = []  # координаты location выделенных
+        # sel = bpy.context.selected_objects
         for i in range(len(sel)):
             sel[i].select = True
-            seloc = sel[i].location.to_tuple(1)  # Coord_locaton
-            el = sel[i].rotation_euler # Coord_Rotation
-            selrot = el[0], el[1], el[2]  # -------
-            dt = {'loc': str(seloc), 'rot': str(selrot)}  # dict
-            sel[i].select = False
-            NULL[str(sel[i].name)] = dt
-            #name_NULL.append(str(sel[i].name))
-##        print('\n\n')
-        dupli = {}
-        # print(NULL)
-        ig = ( )
-        for i in NULL:  # выбираем один элемент из "главного" списка(1действие)
-            bc = NULL.copy()  # копия "главного" словаря
-            it = NULL[i]  # получение значения ключа "главного" списка
-            # print(i)
-            del bc[i]  # # удаление ключа("самого себя")"i". можно bc.pop(i)
-            for k in bc:  # выбираем один элемент из копии "главного" списка(n-действий)
-                if not dupli.get(k):
-                    itc = bc[k]  # получение значения ключа оригинального списка
-                    if it == itc:  # сравнение списков
-                        # print('i',i)
-                        dupli[i] = NULL[i]  # одно действие
-        def locrot(): # функция выделения
-            for i in dupli:
-                # dupli[i]
-                bpy.data.objects[i].select = True
-
-##        def fortune(): # функция перемещения дубликатов
+        for i in range(len(sel)):
+            vec = sel[i].location.to_tuple(1)
+            if vec not in coord:
+                coord.append(vec)
+                single.append(sel[i])  # добавляем в список имена обьектов для выделения
+        bpy.ops.object.select_all(action='TOGGLE')
+        for i in range(len(sel)):
+            if sel[i] not in single:
+                sel[i].select = True
+    if bpy.context.scene.Sdup == 'LOCAL':
+        loca()
+        self.report({'INFO'}, "LOC_MODE: I found %d objects" % len(bpy.context.selected_objects))
+        print("LOC_MODE: %d objects" % len(bpy.context.selected_objects))
+    if bpy.context.scene.Sdup == 'LOCAL_ROTATE':
+        locrot()
+        self.report({'INFO'}, "COMB_MODE:I found %d objects" % len(bpy.context.selected_objects))
+        print("COMB_MODE: %d objects" % len(bpy.context.selected_objects))
+    ##        def fortune(): # функция перемещения дубликатов
 ##            bpy.ops.transform.translate(value=(0, 0, -1.97685), constraint_axis=(False, False, True),
 ##                                        constraint_orientation='GLOBAL', mirror=False, proportional='DISABLED',
 ##                                        proportional_edit_falloff='SMOOTH', proportional_size=8.95431,
@@ -1335,51 +1334,16 @@ class SDUP(bpy.types.Operator):
 ##            bpy.context.object.draw_type = 'WIRE'
 ##            bpy.ops.object.copy_obj_drw()
 ##        print('\n\n\n', len(dupli), '\n\n', dupli, '\n\n', it)
+    return {"FINISHED"}
 
-        def loca():
-            single = []  # не дублируемые обьекты
-            coord = []  # координаты location выделенных
-            # sel = bpy.context.selected_objects
-            for i in range(len(sel)):
-                sel[i].select = True
-            for i in range(len(sel)):
-                vec = sel[i].location.to_tuple(1)
-                if vec not in coord:
-                    coord.append(vec)
-                    single.append(sel[i])  # добавляем в список имена обьектов для выделения
-##                if vec in coord:
-##                    print(vec)
-##            print(coord, '\n', single)
-
-            bpy.ops.object.select_all(action='TOGGLE')
-            # if self.dinv == 1:
-            #     for i in range(len(single)):
-            #         single[i].select = True
-            # else:
-            #     for i in range(len(sel)):
-            #         if sel[i] not in single:
-            #             sel[i].select = True
-            for i in range(len(sel)):
-                if sel[i] not in single:
-                    sel[i].select = True
-
-        # if self.dmv and dupli: # переместить
-        #     fortune()
-        #     self.dmv = 0
-
-        if self.Lc == 'LOCAL': # положение
-            loca()
-            self.report({'INFO'}, "LOC_MODE: I found %d objects" % len(bpy.context.selected_objects))
-            print("LOC_MODE: %d objects" % len(bpy.context.selected_objects))
-        if self.Lc == 'LOCAL_ROTATE': # положение и вращение
-            locrot()
-            self.report({'INFO'}, "COMB_MODE:I found %d objects" % len(bpy.context.selected_objects))
-            print("COMB_MODE: %d objects" % len(bpy.context.selected_objects))
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        global Lc, LRt
-        return context.window_manager.invoke_props_dialog(self)
+bpy.types.Scene.Sdup = bpy.props.EnumProperty(
+        items=[('SRCH', 'SRCH', 'Location of the objectL'),
+                ('LOCAL', 'LOCAL', 'Location of the objectL'),
+                ('LOCAL_ROTATE', 'LOCAL_ROTATE', 'Location of the object & Rotation in Eulers')],
+        name = "Search parameter",
+        description = "Location of the object\n& Rotation in Eulers",
+        default = 'SRCH',
+        update=srchs)
 
 def listmatcap(self, context):
     if bpy.context.space_data.use_matcap == True:
@@ -1714,7 +1678,7 @@ class AUTPanel(bpy.types.Panel):
                 col.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
                 row = layout.row(align=True)
                 col.operator("scene.apjion", text="JO", icon="OBJECT_DATAMODE")
-                col.operator("scene.sdup", text="SRCH", icon="MOD_ARRAY")
+                col.prop(scene, 'Sdup', text="", icon="VIEWZOOM")
             subcol = col.row(align=True)
             subcol.operator("scene.robject", text="Rot&Dub", icon="FORCE_VORTEX")
             subcol.prop(scene, 'fastrnd')
