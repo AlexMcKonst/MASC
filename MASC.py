@@ -1734,7 +1734,6 @@ class AUTPanel(bpy.types.Panel):
 def register():
     bpy.utils.register_class(Matrix)
     bpy.utils.register_class(ExpS)
-    bpy.utils.register_class(SDUP)
     bpy.utils.register_class(Crlwo)
     bpy.utils.register_class(Robject)
     bpy.utils.register_class(Gradobj)
@@ -1771,7 +1770,6 @@ def unregister():
     bpy.utils.unregister_class(Gradobj)
     bpy.utils.unregister_class(Robject)
     bpy.utils.unregister_class(Crlwo)
-    bpy.utils.unregister_class(SDUP)
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
 
