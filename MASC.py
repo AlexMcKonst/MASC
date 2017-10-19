@@ -48,7 +48,7 @@ def selallcr(self, context):
                 break
         bpy.ops.object.editmode_toggle()
     bpy.context.scene.SerSpline = 0
-        return
+    return
 bpy.types.Scene.SerSpline = BoolProperty(
         update = selallcr,
         default = 0
