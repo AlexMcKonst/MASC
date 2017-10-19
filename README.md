@@ -8,4 +8,4 @@ I write code for my menu [WIP] "MASC" with a collection of frequently used comma
 
 blenderartists https://blenderartists.org/forum/showthread.php?417317-My_autos
  INSTALL:
-Just copy the file "AUTO_Srpts.py" in the directory "...Blender Foundation\Blender\2.78\scripts\addons"
+Just copy the file "MASC.py" in the directory "...Blender Foundation\Blender\2.78\scripts\addons"
