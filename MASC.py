@@ -16,6 +16,133 @@ from bpy.types import Panel, Menu, Group, GroupObjects
 from bpy import props
 from bpy.props import *
 
+bpy.types.Scene.CurvBox = BoolProperty(
+        default = 0
+        )  
+def selallcr(self, context):
+    if bpy.context.scene.SerSpline == 1:
+        bpy.ops.object.editmode_toggle()
+        lss=len(bpy.context.object.data.splines.items())
+        crv=0
+        for s in  range(lss):
+            lsb=len(bpy.context.object.data.splines[s].bezier_points.items())
+            for b in range(lsb):
+                spv=bpy.context.object.data.splines[s].bezier_points[b]
+                spv.tilt = False
+                spv.select_control_point = False
+                spv.select_right_handle = False
+                spv.select_left_handle = False
+            crv+=1
+        print(crv)
+        while crv !=1:
+            for s in  range(crv):
+                crv-=1
+                if s!=1:
+                    for b in range(len(bpy.context.object.data.splines[s].bezier_points.items())):
+                        spv=bpy.context.object.data.splines[s].bezier_points[b]
+                        spv.tilt = True
+                        spv.select_control_point = True
+                        spv.select_right_handle = True
+                        spv.select_left_handle = True                       
+                    bpy.ops.curve.separate()
+                break
+        bpy.ops.object.editmode_toggle()
+    bpy.context.scene.SerSpline = 0
+        return
+bpy.types.Scene.SerSpline = BoolProperty(
+        update = selallcr,
+        default = 0
+        )  
+def joincr(self, context):
+    if bpy.context.scene.joincrv == 1:
+        crv=0
+        for s in  range(len(bpy.selection_osc)):    
+            crv+=1
+        print('osc', crv)
+        while crv>=1:
+            if crv >=1:
+                j = bpy.selection_osc
+                jc=j.copy()
+                bpy.ops.object.select_all(action='TOGGLE')
+                for i in range(crv):
+                    crv-=1
+                    jc[1].select = True
+                    jc[0].select = True
+                    bpy.context.scene.objects.active = jc[0]
+                    bpy.ops.object.join()
+                    bpy.ops.object.select_all(action='TOGGLE')
+                    jc.remove(jc[1])
+            break
+    bpy.context.scene.joincrv = 0
+    return
+  
+bpy.types.Scene.joincrv = BoolProperty(
+        update = joincr,
+        default = 0
+        )       
+       
+def MD(param):
+    if param == 'mode':
+        return bpy.context.mode
+    elif param == 'ob':
+        return bpy.context.selected_objects
+    elif param == 'act':
+        return bpy.context.active_object
+
+def mvbgr(self, context):
+    if bpy.context.scene.movebgr == True:
+        def ret(p):
+            xx = bpy.context.window.screen.areas[3].spaces[0].background_images[0].offset_x
+            yy = bpy.context.window.screen.areas[3].spaces[0].background_images[0].offset_y
+            lok = p
+            if lok == 0:
+                return xx
+            else:
+                return yy
+        # 1pixel = 0.2636 mm
+        # 1mm = 3.793627 pixels
+        sy=bpy.context.window.screen.areas[3].spaces[0].background_images[0].image.size[0]*0.2636/2
+        sx=bpy.context.window.screen.areas[3].spaces[0].background_images[0].image.size[1]*0.2636/2
+        bpy.context.window.screen.areas[3].spaces[0].region_3d.view_location.y=ret(1)
+        bpy.context.window.screen.areas[3].spaces[0].region_3d.view_location.x=ret(0)
+        bpy.context.window.screen.areas[3].spaces[0].cursor_location.x=ret(0)
+        bpy.context.window.screen.areas[3].spaces[0].cursor_location.y=ret(1)
+        bpy.context.selected_objects[0].dimensions[1] = sy
+        bpy.ops.apply.transformscale()
+        bpy.context.selected_objects[0].dimensions[0] = sx
+        bpy.ops.apply.transformscale()
+        bpy.ops.view3d.snap_selected_to_cursor(use_offset=True)
+    bpy.context.scene.movebgr =0
+    return
+
+bpy.types.Scene.movebgr = BoolProperty(
+        update = mvbgr,
+        default = 0
+        )
+        
+def Edg_covertCrv(self, context):
+    bpy.ops.mesh.duplicate_move(MESH_OT_duplicate={"mode":1}, TRANSFORM_OT_translate={"value":(0, -0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'VIEW', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":28.1025, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False})
+    bpy.ops.mesh.separate(type='SELECTED')
+    bpy.ops.object.editmode_toggle()
+    bpy.context.active_object.select = False
+    bpy.context.scene.objects.active = bpy.context.selected_objects[0]
+    bpy.ops.object.convert(target='CURVE')
+    bpy.ops.object.editmode_toggle()
+    bpy.ops.curve.spline_type_set(type='BEZIER')
+    bpy.ops.curve.subdivide()
+    bpy.ops.curve.handle_type_set(type='AUTOMATIC')
+    bpy.ops.curve.smooth()
+    bpy.ops.curve.smooth()
+    bpy.ops.curve.smooth()
+    bpy.ops.curve.smooth()
+    bpy.ops.object.editmode_toggle()
+    bpy.context.scene.EdgConvert = False
+    return 
+
+bpy.types.Scene.EdgConvert = BoolProperty(
+        update = Edg_covertCrv,
+        default = 0)
+
 def fstrd(self, context):
     bpy.context.space_data.pivot_point = 'ACTIVE_ELEMENT'
     for i in range(int(bpy.context.scene.fastrnd)):
@@ -45,7 +172,7 @@ def fstrd(self, context):
     bpy.ops.object.delete(use_global=False)
 #        bpy.data.objects[self.robj.name].select = True
 #        bpy.context.scene.objects.active = self.robj
-    return {"FINISHED"}
+    return 
 
 bpy.types.Scene.fastrnd = bpy.props.EnumProperty(name ='',
     description = 'Fast Rot&Dub',
@@ -56,7 +183,7 @@ bpy.types.Scene.fastrnd = bpy.props.EnumProperty(name ='',
     ('5','5','5'),
     ('6','6','6')], 
     update=fstrd)
-
+     
 #-----> """Grading of objects""
 class Gradobj(bpy.types.Operator):
     """Graduation"""
@@ -982,16 +1109,6 @@ class Sacle_Nrml(bpy.types.Operator):
 #        bpy.ops.script.python_file_run(filepath= p + "OutNorm.py")
         return {"FINISHED"}
 
-#----->"""Bevel_0.2"""
-# def myEnum01(scn):
-#     bpy.types.Scene.MyEnum = bpy.props.EnumProperty(
-#         items=[('Eine', 'Un', 'One'),
-#                ('Zwei', 'Deux', 'Two'),
-#                ('Drei', 'Trois', 'Three')],
-#         name="Ziffer",
-#         default = 'Drei')
-#     return
-# myEnum01(bpy.context.scene)
 class BVLn2(bpy.types.Operator):
     """bevel(offset=0.2, segments=2)
     SELECT EDGE LOOP | | | | | | |
@@ -1337,14 +1454,11 @@ def srchs(self, context):
     return {"FINISHED"}
 
 bpy.types.Scene.Sdup = bpy.props.EnumProperty(
-        items=[('SRCH', 'SRCH', 'Location of the objectL'),
-                ('LOCAL', 'LOCAL', 'Location of the objectL'),
+        items=[('LOCAL', 'LOCAL', 'Location of the objectL'),
                 ('LOCAL_ROTATE', 'LOCAL_ROTATE', 'Location of the object & Rotation in Eulers')],
         name = "Search parameter",
         description = "Location of the object\n& Rotation in Eulers",
-        default = 'SRCH',
         update=srchs)
-
 def listmatcap(self, context):
     if bpy.context.space_data.use_matcap == True:
         LM=bpy.context.scene.ListMCScene
@@ -1352,7 +1466,7 @@ def listmatcap(self, context):
             bpy.context.space_data.matcap_icon = '%s' %LM
         else:
             bpy.context.space_data.matcap_icon = '0'+'%s' %LM
-    return
+    return {"FINISHED"}
 
 bpy.types.Scene.ListMCScene = IntProperty(
         name = "MatCap List", 
@@ -1612,6 +1726,7 @@ class AUTPanel(bpy.types.Panel):
                 subcol = split.column(align=True)
                 subcol.prop(ssao_settings, "samples")
 
+
 #-----> """Draw AUTO menu"""
         row = layout.row()
         layout = self.layout
@@ -1632,7 +1747,8 @@ class AUTPanel(bpy.types.Panel):
             col = split.column(align=True)
             col.operator("scene.kursor", text="XYZ", icon="CURSOR")
             col = split.column(align=True)
-            col.operator("scene.gradobj", text="Grad", icon="DOTSUP")
+#            col.operator("scene.gradobj", text="Grad", icon="DOTSUP")
+            col.prop(scene, 'movebgr', icon='ZOOM_ALL')
             split = layout.split()
             if edm == 'OBJECT':
                 col = split.column(align=True)
@@ -1664,12 +1780,7 @@ class AUTPanel(bpy.types.Panel):
                     col.operator("scene.grpnmimts", text="Gruop", icon="GROUP")
                     nmc=bpy.context.selected_objects[0].name
                     col.operator("scene.expos", text='STL' , icon="EXPORT")
-        if edm =='EDIT_CURVE' or tp == 'EMPTY':
-            col = layout
-            col.operator("scene.sdup", text="SRCH", icon="MOD_ARRAY")
-        if edm !='EDIT_MESH':
-            if edm != 'SCULPT':
-                col.operator("scene.crlwo", text='CW' , icon="MESH_TORUS")
+            col.operator("scene.gradobj", text="Grad", icon="DOTSUP")
         if slct != []:
             col = split.column(align=True)
 
@@ -1682,9 +1793,8 @@ class AUTPanel(bpy.types.Panel):
             subcol = col.row(align=True)
             subcol.operator("scene.robject", text="Rot&Dub", icon="FORCE_VORTEX")
             subcol.prop(scene, 'fastrnd')
+            col.prop(scene, 'movebgr', icon='ZOOM_ALL')
 
-            if tp != 'EMPTY':
-                col.operator("scene.bup", text="BUP", icon="MOD_BEVEL")
 #-----> """Block EDIT_MESH"""
         if edm == 'EDIT_MESH':
             # split = layout.split(percentage=0.0, align=True)
@@ -1728,6 +1838,15 @@ class AUTPanel(bpy.types.Panel):
 
         elif ob.dupli_type == 'GROUP':
             layout.prop(ob, "dupli_group", text="Group")
+        layout.prop(scene, 'CurvBox', icon='IPO_BEZIER' if bpy.context.scene.CurvBox == 0 else 'DOWNARROW_HLT', text = 'SBox')
+        if bpy.context.scene.CurvBox == True:
+            layout.prop(scene, 'EdgConvert', icon='SNAP_EDGE', text='Curver')
+            if bpy.context.selected_objects[0].type == 'CURVE':
+                layout.prop(scene, 'SerSpline', icon='IPO_QUINT', text = 'Separator')
+                layout.prop(scene, 'joincrv', icon='IPO_CIRC', text='Connecter')
+                if edm !='EDIT_MESH':
+                    if edm != 'SCULPT':
+                        layout.operator("scene.crlwo", text='CW' , icon="MESH_TORUS")
         
 #-----> """End"""
 
