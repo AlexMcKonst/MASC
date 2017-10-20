@@ -54,26 +54,27 @@ bpy.types.Scene.SerSpline = BoolProperty(
         default = 0
         )  
 def joincr(self, context):
-    if bpy.context.scene.joincrv == 1:
-        crv=0
-        for s in  range(len(bpy.selection_osc)):    
-            crv+=1
-        print('osc', crv)
-        while crv>=1:
-            if crv >=1:
-                j = bpy.selection_osc
-                jc=j.copy()
+#    if bpy.context.scene.joincrv == 1:
+    crv=0
+    for s in  range(len(bpy.selection_osc)):    
+        crv+=1
+    print('osc', crv)
+    while crv>=1:
+        if crv >=1:
+            j = bpy.selection_osc
+            jc=j.copy()
+            bpy.ops.object.select_all(action='TOGGLE')
+            for i in range(crv):
+                crv-=1
+                jc[1].select = True
+                jc[0].select = True
+                bpy.context.scene.objects.active = jc[0]
+                bpy.ops.object.join()
                 bpy.ops.object.select_all(action='TOGGLE')
-                for i in range(crv):
-                    crv-=1
-                    jc[1].select = True
-                    jc[0].select = True
-                    bpy.context.scene.objects.active = jc[0]
-                    bpy.ops.object.join()
-                    bpy.ops.object.select_all(action='TOGGLE')
-                    jc.remove(jc[1])
-            break
+                jc.remove(jc[1])
+        break
     bpy.context.scene.joincrv = 0
+#    bpy.context.scene.joincrv = 0
     return
   
 bpy.types.Scene.joincrv = BoolProperty(
@@ -1776,24 +1777,25 @@ class AUTPanel(bpy.types.Panel):
                 col.operator("scene.scdint", text="DIN" if edm != 'SCULPT' else Btool,
                             icon="BRUSH_FILL" if edm != 'SCULPT' else 'SCULPTMODE_HLT')
                 if edm != 'SCULPT':
-                    col.operator("scene.normshow", text="Nout", icon="INLINK")
+                    subcol = col.row(align=True)
+                    subcol.operator("scene.normshow", text="Nout", icon="INLINK")
+                    subcol.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
                     col.operator("scene.grpnmimts", text="Gruop", icon="GROUP")
                     nmc=bpy.context.selected_objects[0].name
-                    col.operator("scene.expos", text='STL' , icon="EXPORT")
             col.operator("scene.gradobj", text="Grad", icon="DOTSUP")
         if slct != []:
             col = split.column(align=True)
 
         if slct != [] and edm == 'OBJECT':
             if tp != 'EMPTY':
-                col.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
                 row = layout.row(align=True)
+                col.operator("scene.expos", text='STL' , icon="EXPORT")
                 col.operator("scene.apjion", text="JO", icon="OBJECT_DATAMODE")
                 col.prop(scene, 'Sdup', text="", icon="VIEWZOOM")
             subcol = col.row(align=True)
             subcol.operator("scene.robject", text="Rot&Dub", icon="FORCE_VORTEX")
             subcol.prop(scene, 'fastrnd')
-            col.prop(scene, 'movebgr', icon='ZOOM_ALL')
+
 
 #-----> """Block EDIT_MESH"""
         if edm == 'EDIT_MESH':
@@ -1843,7 +1845,7 @@ class AUTPanel(bpy.types.Panel):
             layout.prop(scene, 'EdgConvert', icon='SNAP_EDGE', text='Curver')
             if bpy.context.selected_objects[0].type == 'CURVE':
                 layout.prop(scene, 'SerSpline', icon='IPO_QUINT', text = 'Separator')
-                layout.prop(scene, 'joincrv', icon='IPO_CIRC', text='Connecter')
+                layout.prop(scene, 'joincrv', icon='IPO_CIRC', text='Connector')
                 if edm !='EDIT_MESH':
                     if edm != 'SCULPT':
                         layout.operator("scene.crlwo", text='CW' , icon="MESH_TORUS")
