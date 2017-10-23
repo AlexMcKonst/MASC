@@ -16,6 +16,42 @@ from bpy.types import Panel, Menu, Group, GroupObjects
 from bpy import props
 from bpy.props import *
 
+bpy.selection_msc = []
+
+def select_osc():
+    if bpy.context.mode == "OBJECT":
+        obj = bpy.context.object
+        sel = len(bpy.context.selected_objects)
+
+        if sel == 0:
+            bpy.selection_msc = []
+        else:
+            if sel == 1:
+                bpy.selection_msc = []
+                bpy.selection_msc.append(obj)
+            elif sel > len(bpy.selection_msc):
+                for sobj in bpy.context.selected_objects:
+                    if (sobj in bpy.selection_msc) is False:
+                        bpy.selection_msc.append(sobj)
+
+            elif sel < len(bpy.selection_msc):
+                for it in bpy.selection_msc:
+                    if (it in bpy.context.selected_objects) is False:
+                        bpy.selection_msc.remove(it)
+
+
+class MASCSelection(bpy.types.Header):
+    bl_label = "Selection MASC"
+    bl_space_type = "VIEW_3D"
+
+    def __init__(self):
+        select_osc()
+
+    def draw(self, context):
+        """
+        bpy.selection_msc
+        """
+
 bpy.types.Scene.CurvBox = BoolProperty(
         default = 0
         )  
@@ -56,12 +92,12 @@ bpy.types.Scene.SerSpline = BoolProperty(
 def joincr(self, context):
 #    if bpy.context.scene.joincrv == 1:
     crv=0
-    for s in  range(len(bpy.selection_osc)):    
+    for s in  range(len(bpy.selection_msc)):    
         crv+=1
     print('osc', crv)
     while crv>=1:
         if crv >=1:
-            j = bpy.selection_osc
+            j = bpy.selection_msc
             jc=j.copy()
             bpy.ops.object.select_all(action='TOGGLE')
             for i in range(crv):
@@ -605,7 +641,7 @@ class changobj(bpy.types.Operator):
 #        min=-(len(bpy.context.selected_objects)),
         max=-1
         )
-#    lo = bpy.selection_osc
+#    lo = bpy.selection_msc
     def execute(self, context):
         try:
             Ob = bpy.context.object.select
@@ -1872,8 +1908,10 @@ def register():
     bpy.utils.register_class(changobj)
     bpy.utils.register_class(BVLnSingl)
     bpy.utils.register_class(B_UP)
+    bpy.utils.register_class(MASCSelection)
 
 def unregister():
+    bpy.utils.unregister_class(MASCSelection)
     bpy.utils.unregister_class(B_UP)
     bpy.utils.unregister_class(BVLnSingl)
     bpy.utils.unregister_class(changobj)
