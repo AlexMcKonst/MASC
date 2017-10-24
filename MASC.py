@@ -227,20 +227,7 @@ class QuickShrink(bpy.types.Operator):
     bl_idname = "scene.qshrink"
     bl_label = "QShrink"
 #    bl_options = {"REGISTER", "UNDO"}
-    
-#    def myfunc(self, d):
-#        d=[(i.name, i.name, i.name) for i in list(bpy.data.groups)] if bpy.data.groups.items() != [] else [('The list is empty', 'The list is empty', 'The list is empty')]
-#        if bpy.data.groups.items() != []:
-#            d.append(('Select a group name', 'Select a group name', 'Select a group name'))
-#        return d
-#    def itemsMod(self, m):
-##        lst=bpy.selection_msc[-1].name
-#        mdf = bpy.data.objects[bpy.selection_msc[-1].name].modifiers.items()       
-#        m=[(mdf[i][0], mdf[i][0], mdf[i][0]) for i in range(len(mdf) if mdf != [] else [('The list is empty', 'The list is empty', 'The list is empty')]
-#        if mdf !=[]:
-#            m.append(('Select a group name', 'Select a group name', 'Select a group name'))
-#        return m
-#    
+
 #    bm0 = bpy.props.EnumProperty(
 #        items=itemsMod,
 #        name = "",
