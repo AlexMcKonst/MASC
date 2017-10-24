@@ -220,6 +220,40 @@ bpy.types.Scene.fastrnd = bpy.props.EnumProperty(name ='',
     ('5','5','5'),
     ('6','6','6')], 
     update=fstrd)
+
+#----->
+class QuickShrink(bpy.types.Operator):
+    """Quick_Shrink"""
+    bl_idname = "scene.qshrink"
+    bl_label = "QShrink"
+#    bl_options = {"REGISTER", "UNDO"}
+    
+#    def myfunc(self, d):
+#        d=[(i.name, i.name, i.name) for i in list(bpy.data.groups)] if bpy.data.groups.items() != [] else [('The list is empty', 'The list is empty', 'The list is empty')]
+#        if bpy.data.groups.items() != []:
+#            d.append(('Select a group name', 'Select a group name', 'Select a group name'))
+#        return d
+#    def itemsMod(self, m):
+##        lst=bpy.selection_msc[-1].name
+#        mdf = bpy.data.objects[bpy.selection_msc[-1].name].modifiers.items()       
+#        m=[(mdf[i][0], mdf[i][0], mdf[i][0]) for i in range(len(mdf) if mdf != [] else [('The list is empty', 'The list is empty', 'The list is empty')]
+#        if mdf !=[]:
+#            m.append(('Select a group name', 'Select a group name', 'Select a group name'))
+#        return m
+#    
+#    bm0 = bpy.props.EnumProperty(
+#        items=itemsMod,
+#        name = "",
+#        description = "",
+#        default = ''
+#        )
+    def execute(self, context):
+        sel = bpy.selection_msc
+        bpy.context.scene.objects.active = sel[0]
+        bpy.ops.object.modifier_add(type='SHRINKWRAP')
+        bpy.data.objects[sel[0].name].modifiers['Shrinkwrap'].target = sel[-1]
+        bpy.context.object.modifiers["Shrinkwrap"].show_on_cage = True
+        return {"FINISHED"}
      
 #-----> """Grading of objects""
 class Gradobj(bpy.types.Operator):
@@ -1889,6 +1923,7 @@ class AUTPanel(bpy.types.Panel):
 #-----> """End"""
 
 def register():
+    bpy.utils.register_class(QuickShrink)
     bpy.utils.register_class(Matrix)
     bpy.utils.register_class(ExpS)
     bpy.utils.register_class(Crlwo)
@@ -1911,6 +1946,7 @@ def register():
     bpy.utils.register_class(MASCSelection)
 
 def unregister():
+    bpy.utils.unregister_class(QuickShrink)
     bpy.utils.unregister_class(MASCSelection)
     bpy.utils.unregister_class(B_UP)
     bpy.utils.unregister_class(BVLnSingl)
