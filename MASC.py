@@ -228,18 +228,21 @@ class QuickShrink(bpy.types.Operator):
     bl_label = "QShrink"
 #    bl_options = {"REGISTER", "UNDO"}
 
-#    bm0 = bpy.props.EnumProperty(
-#        items=itemsMod,
-#        name = "",
-#        description = "",
-#        default = ''
-#        )
     def execute(self, context):
         sel = bpy.selection_msc
         bpy.context.scene.objects.active = sel[0]
+        if len(sel) >=2:
+            sel[1].select = False
+        asl = bpy.selection_msc[0].name
+        if bpy.data.objects[asl].modifiers.items() != []:
+            if 'QShrinkwrap' in bpy.data.objects[asl].modifiers.items()[-1][0]:
+                bpy.ops.object.modifier_remove(modifier="QShrinkwrap")
         bpy.ops.object.modifier_add(type='SHRINKWRAP')
-        bpy.data.objects[sel[0].name].modifiers['Shrinkwrap'].target = sel[-1]
-        bpy.context.object.modifiers["Shrinkwrap"].show_on_cage = True
+        lst = bpy.data.objects[asl].modifiers.items()[-1][0]
+        bpy.context.object.modifiers[lst].name = "QShrinkwrap"
+        lst = bpy.data.objects[asl].modifiers.items()[-1][0]
+        bpy.data.objects[asl].modifiers[lst].target = sel[-1]
+        bpy.context.object.modifiers[lst].show_on_cage = True 
         return {"FINISHED"}
      
 #-----> """Grading of objects""
