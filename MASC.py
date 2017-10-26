@@ -244,6 +244,29 @@ class QuickShrink(bpy.types.Operator):
         bpy.data.objects[asl].modifiers[lst].target = sel[-1]
         bpy.context.object.modifiers[lst].show_on_cage = True 
         return {"FINISHED"}
+    
+class QuickMirror(bpy.types.Operator):
+    """Quick_Mirror"""
+    bl_idname = "scene.qmirror"
+    bl_label = "QMirror_Object"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        sel = bpy.selection_msc
+        bpy.context.scene.objects.active = sel[0]
+        if len(sel) >=2:
+            sel[1].select = False
+        asl = bpy.selection_msc[0].name
+        if bpy.data.objects[asl].modifiers.items() != []:
+            if 'QMirror' in bpy.data.objects[asl].modifiers.items()[-1][0]:
+                bpy.ops.object.modifier_remove(modifier="QMirror")
+        bpy.ops.object.modifier_add(type='MIRROR')
+        lst = bpy.data.objects[asl].modifiers.items()[-1][0]
+        bpy.context.object.modifiers[lst].name = "QMirror"
+        lst = bpy.data.objects[asl].modifiers.items()[-1][0]
+        bpy.context.object.modifiers[lst].mirror_object = sel[-1]
+        bpy.context.object.modifiers[lst].show_on_cage = True 
+        return {"FINISHED"}
      
 #-----> """Grading of objects""
 class Gradobj(bpy.types.Operator):
@@ -1105,7 +1128,7 @@ class App_NmLink_ToEmpty(bpy.types.Operator):
 class Sacle_Nrml(bpy.types.Operator):
     """Aply sacle, outnormal"""
     bl_idname = "scene.rscnrm"
-    bl_label = "ReScale & normalOut"
+    bl_label = "ReScale & normalOut"
     bl_options = {"REGISTER", "UNDO"}
 
     unlo = bpy.props.BoolProperty(
@@ -1426,7 +1449,7 @@ class B_UP(bpy.types.Operator):
         if bmf ==[]: # если спискок пуст запускаем функцию сохдания бевела
             bvlprms()
             bct = 1
-        while bct !=1: # create "BEVEL" and UP in steck Р вычисляем длину списка
+        while bct !=1: # create "BEVEL" and UP in steck Р вычисляем длину списка
             it = bmf[bch][1].type
             if it != 'BEVEL':
                 bch = bch+1
@@ -1913,6 +1936,7 @@ class AUTPanel(bpy.types.Panel):
 #-----> """End"""
 
 def register():
+    bpy.utils.register_class(QuickMirror)
     bpy.utils.register_class(QuickShrink)
     bpy.utils.register_class(Matrix)
     bpy.utils.register_class(ExpS)
@@ -1936,6 +1960,7 @@ def register():
     bpy.utils.register_class(MASCSelection)
 
 def unregister():
+    bpy.utils.unregister_class(QuickMirror)
     bpy.utils.unregister_class(QuickShrink)
     bpy.utils.unregister_class(MASCSelection)
     bpy.utils.unregister_class(B_UP)
