@@ -9,5 +9,6 @@ The main idea of the addon 'MASC' is this:
 "daily tasks with simple code
 
 blenderartists https://blenderartists.org/forum/showthread.php?417317-Addon-MASC-this-is-a-set-of-scenarios-for-automating-routine-workflows&highlight=
- INSTALL:
+
+INSTALL:
 Just copy the file "MASC.py" in the directory "...Blender Foundation\Blender\2.78\scripts\addons"
