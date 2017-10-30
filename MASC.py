@@ -1187,6 +1187,7 @@ class BVLn2(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
     
     bofs = bpy.props.FloatProperty(name="Offset", description="offset", default=0.2)
+    bev = bpy.props.BoolProperty(name="Even", default=0, description="Improved accuracy of extrusion")
     bts = bpy.props.FloatProperty(name="Depth/height", default=0.2)
     bss = bpy.props.IntProperty(name="Subiv", default=1, min=0)
     dmns = bpy.props.BoolProperty(name="Invert", default=0)
@@ -1207,9 +1208,7 @@ class BVLn2(bpy.types.Operator):
             bpy.ops.object.editmode_toggle()
             bpy.ops.mesh.subdivide_edgering(number_cuts=1, interpolation='LINEAR', smoothness=0, profile_shape_factor=0)
             bpy.ops.mesh.select_all(action='TOGGLE')
-
             bpy.ops.object.editmode_toggle()
-
             it2=bpy.selection_msc[0].data.edges.items()
 
             for i in it2:
@@ -1223,14 +1222,15 @@ class BVLn2(bpy.types.Operator):
                 SelNEdg()
 #                bpy.ops.mesh.subdivide(smoothness=0)
 #                bpy.ops.mesh.select_less()
+
                 bpy.ops.transform.edge_slide(value=self.btr, mirror=False, correct_uv=False)
                 bpy.ops.mesh.bevel(
-                offset=self.bofs/2,
-                segments=self.bss+1,
-                vertex_only=False
-                )
+                        offset=self.bofs/2,
+                        segments=self.bss+1,
+                        vertex_only=False
+                        )
                 bpy.ops.mesh.select_less()
-                bpy.ops.transform.shrink_fatten(value=(self.bts * -1) if self.dmns == 1 else self.bts)
+                bpy.ops.transform.shrink_fatten(value=(self.bts * -1) if self.dmns == 1 else self.bts, use_even_offset=self.bev)
                 bpy.ops.mesh.remove_doubles(threshold=self.brd)
                 if self.brx == True:
                     try:
@@ -1250,6 +1250,7 @@ class BVLnSingl(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     bofs = bpy.props.FloatProperty(name="Offset", description="offset", default=0.2)
+    bev = bpy.props.BoolProperty(name="Even", default=0, description="Improved accuracy of extrusion")
     bts = bpy.props.FloatProperty(name="Depth/Height", default=0.2)
     bss = bpy.props.IntProperty(name="Subiv", default=1,min=0)
     brd = bpy.props.FloatProperty(name="Remove_doubles", default=0.0)
@@ -1267,7 +1268,7 @@ class BVLnSingl(bpy.types.Operator):
             bpy.ops.transform.edge_slide(value=self.btr, mirror=False, correct_uv=False)
             bpy.ops.mesh.bevel(offset=self.bofs/2 , segments=self.bss+1 , vertex_only=False)
             bpy.ops.mesh.select_less()
-            bpy.ops.transform.shrink_fatten(value=(self.bts * -1) if self.dms == 1 else self.bts)
+            bpy.ops.transform.shrink_fatten(value=(self.bts * -1) if self.dms == 1 else self.bts, use_even_offset=self.bev)
             bpy.ops.mesh.remove_doubles(threshold=self.brd)
             if self.brx == True:
                 try:
