@@ -1177,6 +1177,7 @@ bpy.types.Scene.mbvl = bpy.props.EnumProperty(name ='',
     ('BVLn2','BVLn2','+'),
     ('BVLnSingl','BVLnSingl','+')]
     )
+    
 class BVLn2(bpy.types.Operator):
     """bevel(offset=0.2, segments=2)
     SELECT EDGE LOOP | | | | | | |
@@ -1184,25 +1185,48 @@ class BVLn2(bpy.types.Operator):
     bl_idname = "scene.bvln"
     bl_label = "Bevel 0.2"
     bl_options = {"REGISTER", "UNDO"}
-    bts = bpy.props.FloatProperty(name="Depth/height", description="shrink_fatten", default=0.2)
-    bss = bpy.props.IntProperty(name="Subiv", description="subd", default=2, min=0)
-    dmns = bpy.props.BoolProperty(name="Invert", description="INV", default=0)
-    brx = bpy.props.BoolProperty(name="RELAX", description="looptools_relax", default=False)
-    brd = bpy.props.FloatProperty(name="Remove_doubles", description="dbls", default=0.0)
-
+    
+    bofs = bpy.props.FloatProperty(name="Offset", description="offset", default=0.2)
+    bts = bpy.props.FloatProperty(name="Depth/height", default=0.2)
+    bss = bpy.props.IntProperty(name="Subiv", default=1, min=0)
+    dmns = bpy.props.BoolProperty(name="Invert", default=0)
+    brx = bpy.props.BoolProperty(name="Relax", description="looptools_relax", default=False)
+    brd = bpy.props.FloatProperty(name="Remove_doubles", default=0.0)
+    btr = bpy.props.FloatProperty(name="Bevel_Slide", default=0.0)
 
     def execute(self, context):
+
+#        bpy.ops.mesh.subdivide_edgering(number_cuts=1, interpolation='LINEAR', smoothness=0, profile_shape_factor=0)
 #        bpy.ops.script.python_file_run(filepath= p + "Bvl0,2.py")
         Ob = bpy.context.object.select
         adtt = bpy.context.mode
+        def SelNEdg():       
+            bpy.ops.object.editmode_toggle()
+            itt=bpy.selection_msc[0].data.edges.items()
+            itv=[i[0] for i in bpy.selection_msc[0].data.vertices.items()]
+            bpy.ops.object.editmode_toggle()
+            bpy.ops.mesh.subdivide_edgering(number_cuts=1, interpolation='LINEAR', smoothness=0, profile_shape_factor=0)
+            bpy.ops.mesh.select_all(action='TOGGLE')
 
+            bpy.ops.object.editmode_toggle()
+
+            it2=bpy.selection_msc[0].data.edges.items()
+
+            for i in it2:
+                if i not in itt:
+                    if i[1].vertices[0] not in itv and i[1].vertices[1] not in itv:
+                        i[1].select = True  
+
+            bpy.ops.object.editmode_toggle()
         if Ob == True:
             if adtt == 'EDIT_MESH':
-                bpy.ops.mesh.subdivide(smoothness=0)
-                bpy.ops.mesh.select_less()
+                SelNEdg()
+#                bpy.ops.mesh.subdivide(smoothness=0)
+#                bpy.ops.mesh.select_less()
+                bpy.ops.transform.edge_slide(value=self.btr, mirror=False, correct_uv=False)
                 bpy.ops.mesh.bevel(
-                offset=0.1,
-                segments=self.bss,
+                offset=self.bofs/2,
+                segments=self.bss+1,
                 vertex_only=False
                 )
                 bpy.ops.mesh.select_less()
@@ -1226,14 +1250,14 @@ class BVLnSingl(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     bofs = bpy.props.FloatProperty(name="Offset", description="offset", default=0.2)
-    bts = bpy.props.FloatProperty(name="Depth/Height", description="shrink_fatten", default=0.2)
-    bss = bpy.props.IntProperty(name="Subiv", description="subd", default=2,min=0)
-    brd = bpy.props.FloatProperty(name="Remove_doubles", description="dbls", default=0.0)
-    dsp = bpy.props.BoolProperty(name="Super_Dept", description="SDPT", default=0)
-    bvs = bpy.props.FloatProperty(name="Bevel", description="BVL", default=0)
-    dms = bpy.props.BoolProperty(name="Invert", description="INV", default=0)
+    bts = bpy.props.FloatProperty(name="Depth/Height", default=0.2)
+    bss = bpy.props.IntProperty(name="Subiv", default=1,min=0)
+    brd = bpy.props.FloatProperty(name="Remove_doubles", default=0.0)
+    dsp = bpy.props.BoolProperty(name="Super_Dept", default=0)
+    bvs = bpy.props.FloatProperty(name="Bevel", default=0)
+    dms = bpy.props.BoolProperty(name="Invert", default=0)
     brx = bpy.props.BoolProperty(name="Relax", description="looptlsrlx", default=0)
-    btr = bpy.props.FloatProperty(name="Bevel_Slide", description="bevel_slide", default=0.0)
+    btr = bpy.props.FloatProperty(name="Bevel_Slide", default=0.0)
     def execute(self, context):
         def edbl():
             """
@@ -1241,7 +1265,7 @@ class BVLnSingl(bpy.types.Operator):
             loop multi_select(False) edges
             """
             bpy.ops.transform.edge_slide(value=self.btr, mirror=False, correct_uv=False)
-            bpy.ops.mesh.bevel(offset=self.bofs/2 , segments=self.bss , vertex_only=False)
+            bpy.ops.mesh.bevel(offset=self.bofs/2 , segments=self.bss+1 , vertex_only=False)
             bpy.ops.mesh.select_less()
             bpy.ops.transform.shrink_fatten(value=(self.bts * -1) if self.dms == 1 else self.bts)
             bpy.ops.mesh.remove_doubles(threshold=self.brd)
