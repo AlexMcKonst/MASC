@@ -1184,11 +1184,12 @@ class BVLn2(bpy.types.Operator):
     bl_idname = "scene.bvln"
     bl_label = "Bevel 0.2"
     bl_options = {"REGISTER", "UNDO"}
-    bts = bpy.props.FloatProperty(name="depth/height", description="shrink_fatten", default=0.2)
-    bss = bpy.props.IntProperty(name="subiv", description="subd", default=2, min=0)
+    bts = bpy.props.FloatProperty(name="Depth/height", description="shrink_fatten", default=0.2)
+    bss = bpy.props.IntProperty(name="Subiv", description="subd", default=2, min=0)
     dmns = bpy.props.BoolProperty(name="Invert", description="INV", default=0)
     brx = bpy.props.BoolProperty(name="RELAX", description="looptools_relax", default=False)
     brd = bpy.props.FloatProperty(name="Remove_doubles", description="dbls", default=0.0)
+
 
     def execute(self, context):
 #        bpy.ops.script.python_file_run(filepath= p + "Bvl0,2.py")
@@ -1224,15 +1225,15 @@ class BVLnSingl(bpy.types.Operator):
     bl_label = "BnS_Plus"
     bl_options = {"REGISTER", "UNDO"}
 
-    bofs = bpy.props.FloatProperty(name="offset", description="offset", default=0.2)
-    bts = bpy.props.FloatProperty(name="depth/height", description="shrink_fatten", default=0.2)
-    bss = bpy.props.IntProperty(name="subiv", description="subd", default=2,min=0)
+    bofs = bpy.props.FloatProperty(name="Offset", description="offset", default=0.2)
+    bts = bpy.props.FloatProperty(name="Depth/Height", description="shrink_fatten", default=0.2)
+    bss = bpy.props.IntProperty(name="Subiv", description="subd", default=2,min=0)
     brd = bpy.props.FloatProperty(name="Remove_doubles", description="dbls", default=0.0)
     dsp = bpy.props.BoolProperty(name="Super_Dept", description="SDPT", default=0)
     bvs = bpy.props.FloatProperty(name="Bevel", description="BVL", default=0)
     dms = bpy.props.BoolProperty(name="Invert", description="INV", default=0)
-    brx = bpy.props.BoolProperty(name="RELAX", description="looptlsrlx", default=0)
-    btr = bpy.props.FloatProperty(name="bevel_slide", description="bevel_slide", default=0.0)
+    brx = bpy.props.BoolProperty(name="Relax", description="looptlsrlx", default=0)
+    btr = bpy.props.FloatProperty(name="Bevel_Slide", description="bevel_slide", default=0.0)
     def execute(self, context):
         def edbl():
             """
