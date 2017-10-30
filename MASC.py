@@ -18,7 +18,7 @@ from bpy.props import *
 
 bpy.selection_msc = []
 
-def select_osc():
+def select_msc():
     if bpy.context.mode == "OBJECT":
         obj = bpy.context.object
         sel = len(bpy.context.selected_objects)
@@ -45,7 +45,7 @@ class MASCSelection(bpy.types.Header):
     bl_space_type = "VIEW_3D"
 
     def __init__(self):
-        select_osc()
+        select_msc()
 
     def draw(self, context):
         """
@@ -54,7 +54,7 @@ class MASCSelection(bpy.types.Header):
 
 bpy.types.Scene.CurvBox = BoolProperty(
         default = 0
-        )  
+        )
 def selallcr(self, context):
     if bpy.context.scene.SerSpline == 1:
         bpy.ops.object.editmode_toggle()
@@ -119,43 +119,12 @@ bpy.types.Scene.joincrv = BoolProperty(
         )       
        
 def MD(param):
-    if param == 'mode':
+    if param == 'md':
         return bpy.context.mode
     elif param == 'ob':
         return bpy.context.selected_objects
     elif param == 'act':
         return bpy.context.active_object
-
-def mvbgr(self, context):
-    if bpy.context.scene.movebgr == True:
-        def ret(p):
-            xx = bpy.context.window.screen.areas[3].spaces[0].background_images[0].offset_x
-            yy = bpy.context.window.screen.areas[3].spaces[0].background_images[0].offset_y
-            lok = p
-            if lok == 0:
-                return xx
-            else:
-                return yy
-        # 1pixel = 0.2636 mm
-        # 1mm = 3.793627 pixels
-        sy=bpy.context.window.screen.areas[3].spaces[0].background_images[0].image.size[0]*0.2636/2
-        sx=bpy.context.window.screen.areas[3].spaces[0].background_images[0].image.size[1]*0.2636/2
-        bpy.context.window.screen.areas[3].spaces[0].region_3d.view_location.y=ret(1)
-        bpy.context.window.screen.areas[3].spaces[0].region_3d.view_location.x=ret(0)
-        bpy.context.window.screen.areas[3].spaces[0].cursor_location.x=ret(0)
-        bpy.context.window.screen.areas[3].spaces[0].cursor_location.y=ret(1)
-        bpy.context.selected_objects[0].dimensions[1] = sy
-        bpy.ops.apply.transformscale()
-        bpy.context.selected_objects[0].dimensions[0] = sx
-        bpy.ops.apply.transformscale()
-        bpy.ops.view3d.snap_selected_to_cursor(use_offset=True)
-    bpy.context.scene.movebgr =0
-    return
-
-bpy.types.Scene.movebgr = BoolProperty(
-        update = mvbgr,
-        default = 0
-        )
         
 def Edg_covertCrv(self, context):
     bpy.ops.mesh.duplicate_move(MESH_OT_duplicate={"mode":1}, TRANSFORM_OT_translate={"value":(0, -0, 0), "constraint_axis":(False, False, False), "constraint_orientation":'VIEW', "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":28.1025, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False})
@@ -250,13 +219,25 @@ class QuickMirror(bpy.types.Operator):
     bl_idname = "scene.qmirror"
     bl_label = "QMirror_Object"
     bl_options = {"REGISTER", "UNDO"}
-
+    
+    axm = BoolVectorProperty(
+            name="Axis", 
+            description="Axis", 
+            default=(1, 0, 0),
+            subtype = 'XYZ')
+    axm2 = BoolProperty(
+            name="Axis", 
+            description="Axis", 
+            default=0
+            )
     def execute(self, context):
+        print(self.axm[0], self.axm[1], self.axm[2])
         sel = bpy.selection_msc
         bpy.context.scene.objects.active = sel[0]
-        if len(sel) >=2:
-            sel[1].select = False
-        asl = bpy.selection_msc[0].name
+#        bpy.context.scene.objects.active.select = True
+#        if len(sel) >=2:
+#            sel[1].select = False
+        asl = bpy.context.scene.objects.active.name
         if bpy.data.objects[asl].modifiers.items() != []:
             if 'QMirror' in bpy.data.objects[asl].modifiers.items()[-1][0]:
                 bpy.ops.object.modifier_remove(modifier="QMirror")
@@ -266,6 +247,10 @@ class QuickMirror(bpy.types.Operator):
         lst = bpy.data.objects[asl].modifiers.items()[-1][0]
         bpy.context.object.modifiers[lst].mirror_object = sel[-1]
         bpy.context.object.modifiers[lst].show_on_cage = True 
+        bpy.context.object.modifiers[lst].use_x = self.axm[0]
+        bpy.context.object.modifiers[lst].use_y = self.axm[1]
+        bpy.context.object.modifiers[lst].use_z = self.axm[2]
+        bpy.context.scene.objects.active = sel[1]   
         return {"FINISHED"}
      
 #-----> """Grading of objects""
@@ -1016,13 +1001,6 @@ class GruopForNameItems(bpy.types.Operator):
         description="Select a method for grouping",
         default='Total group')
 
-    # def myfunc2(self, s):
-        # s = {}
-        # if self.gset == 'Many groups':
-        #     s = {'HIDDEN'}
-        # else:
-        # s = {'ANIMATABLE'}
-        # return s
     gstr = bpy.props.StringProperty(
         name="Any Name", # любое имя
         description="Enter the name of the 'Total group'.\nBy default, the group takes the name of the active object",
@@ -1193,6 +1171,12 @@ class Sacle_Nrml(bpy.types.Operator):
 #        bpy.ops.script.python_file_run(filepath= p + "OutNorm.py")
         return {"FINISHED"}
 
+bpy.types.Scene.mbvl = bpy.props.EnumProperty(name ='',
+    description = 'BEVEL',
+    items=[
+    ('BVLn2','BVLn2','+'),
+    ('BVLnSingl','BVLnSingl','+')]
+    )
 class BVLn2(bpy.types.Operator):
     """bevel(offset=0.2, segments=2)
     SELECT EDGE LOOP | | | | | | |
@@ -1205,7 +1189,6 @@ class BVLn2(bpy.types.Operator):
     dmns = bpy.props.BoolProperty(name="Invert", description="INV", default=0)
     brx = bpy.props.BoolProperty(name="RELAX", description="looptools_relax", default=False)
     brd = bpy.props.FloatProperty(name="Remove_doubles", description="dbls", default=0.0)
-
 
     def execute(self, context):
 #        bpy.ops.script.python_file_run(filepath= p + "Bvl0,2.py")
@@ -1240,6 +1223,8 @@ class BVLnSingl(bpy.types.Operator):
     bl_idname = "scene.bvlntwo"
     bl_label = "BnS_Plus"
     bl_options = {"REGISTER", "UNDO"}
+
+    bofs = bpy.props.FloatProperty(name="offset", description="offset", default=0.2)
     bts = bpy.props.FloatProperty(name="depth/height", description="shrink_fatten", default=0.2)
     bss = bpy.props.IntProperty(name="subiv", description="subd", default=2,min=0)
     brd = bpy.props.FloatProperty(name="Remove_doubles", description="dbls", default=0.0)
@@ -1247,13 +1232,15 @@ class BVLnSingl(bpy.types.Operator):
     bvs = bpy.props.FloatProperty(name="Bevel", description="BVL", default=0)
     dms = bpy.props.BoolProperty(name="Invert", description="INV", default=0)
     brx = bpy.props.BoolProperty(name="RELAX", description="looptlsrlx", default=0)
+    btr = bpy.props.FloatProperty(name="bevel_slide", description="bevel_slide", default=0.0)
     def execute(self, context):
         def edbl():
             """
             Bevel(0.2, 2 - subd)
             loop multi_select(False) edges
             """
-            bpy.ops.mesh.bevel(offset=0.1 , segments=self.bss , vertex_only=False)
+            bpy.ops.transform.edge_slide(value=self.btr, mirror=False, correct_uv=False)
+            bpy.ops.mesh.bevel(offset=self.bofs/2 , segments=self.bss , vertex_only=False)
             bpy.ops.mesh.select_less()
             bpy.ops.transform.shrink_fatten(value=(self.bts * -1) if self.dms == 1 else self.bts)
             bpy.ops.mesh.remove_doubles(threshold=self.brd)
@@ -1726,6 +1713,8 @@ class Matrix(bpy.types.Operator):
                         continue
         return {'FINISHED'}
 
+
+
 class AUTPanel(bpy.types.Panel):
 
     bl_label = "MASC"
@@ -1832,7 +1821,8 @@ class AUTPanel(bpy.types.Panel):
             col.operator("scene.kursor", text="XYZ", icon="CURSOR")
             col = split.column(align=True)
 #            col.operator("scene.gradobj", text="Grad", icon="DOTSUP")
-            col.prop(scene, 'movebgr', icon='ZOOM_ALL')
+#            cl.prop(scene, 'movebgr', icon='ZOOM_ALL')
+            col.prop(scene, 'CurvBox', icon='IPO_BEZIER' if bpy.context.scene.CurvBox == 0 else 'DOWNARROW_HLT', text = 'SBox')
             split = layout.split()
             if edm == 'OBJECT':
                 col = split.column(align=True)
@@ -1865,7 +1855,7 @@ class AUTPanel(bpy.types.Panel):
                     subcol.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
                     col.operator("scene.grpnmimts", text="Gruop", icon="GROUP")
                     nmc=bpy.context.selected_objects[0].name
-            col.operator("scene.gradobj", text="Grad", icon="DOTSUP")
+                    col.operator("scene.gradobj", text="Grad", icon="DOTSUP")
         if slct != []:
             col = split.column(align=True)
 
@@ -1885,6 +1875,8 @@ class AUTPanel(bpy.types.Panel):
             # split = layout.split(percentage=0.0, align=True)
             col.operator("scene.rscnrm", text="Restore", icon="MESH_ICOSPHERE")
             col = split.column(align=True)
+#            col.prop(scene, 'mbvl', text="Bv | |", icon="EDGESEL")
+#            col = split.column(align=True)
             col.operator("scene.bvln", text="Bv | |", icon="EDGESEL")
             col = split.column(align=True)
             col.operator("scene.bvlntwo", text="Bv ==", icon="EDGESEL")
@@ -1923,7 +1915,7 @@ class AUTPanel(bpy.types.Panel):
 
         elif ob.dupli_type == 'GROUP':
             layout.prop(ob, "dupli_group", text="Group")
-        layout.prop(scene, 'CurvBox', icon='IPO_BEZIER' if bpy.context.scene.CurvBox == 0 else 'DOWNARROW_HLT', text = 'SBox')
+#        layout.prop(scene, 'CurvBox', icon='IPO_BEZIER' if bpy.context.scene.CurvBox == 0 else 'DOWNARROW_HLT', text = 'SBox')
         if bpy.context.scene.CurvBox == True:
             layout.prop(scene, 'EdgConvert', icon='SNAP_EDGE', text='Curver')
             if bpy.context.selected_objects[0].type == 'CURVE':
