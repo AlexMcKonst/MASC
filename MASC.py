@@ -51,6 +51,32 @@ class MASCSelection(bpy.types.Header):
         """
         bpy.selection_msc
         """
+class Del_SObj(bpy.types.Operator):
+    '''Removes dependence of selected objects\nfrom all layers of the "Super_Grouper" stack
+    '''   
+    bl_idname = "scene.sgobjsdel"
+    bl_label = "SG_Sel_DEL"
+    bl_options = {"REGISTER", "UNDO"}
+    
+#    @classmethod
+#    def poll(cls, context):
+#        if bpy.selection_msc == []:
+#            pass
+#        return
+    def execute(self, context):
+        if bpy.selection_msc != []:
+            try:
+                for i in range(len(bpy.context.scene.super_groups.items())):
+                    print ('removed from %s' % bpy.context.scene.super_groups.items()[i][0])
+                    bpy.context.scene.super_groups_index = i
+                    bpy.ops.super_grouper.super_remove_from_group()
+                self.report({'INFO'}, "OK. objects are separated")   
+                bpy.ops.object.select_all(action='TOGGLE') 
+            except AttributeError:
+                self.report({'WARNING'}, "'I'm sorry the addon 'super_grouper' is not active or not installed")
+        else:
+            self.report({'WARNING'}, "No selected objects")
+        return {"FINISHED"}
 
 bpy.types.Scene.CurvBox = BoolProperty(
         default = 0
@@ -90,27 +116,27 @@ bpy.types.Scene.SerSpline = BoolProperty(
         default = 0
         )  
 def joincr(self, context):
-#    if bpy.context.scene.joincrv == 1:
-    crv=0
-    for s in  range(len(bpy.selection_msc)):    
-        crv+=1
-    print('osc', crv)
-    while crv>=1:
-        if crv >=1:
-            j = bpy.selection_msc
-            jc=j.copy()
-            bpy.ops.object.select_all(action='TOGGLE')
-            for i in range(crv):
-                crv-=1
-                jc[1].select = True
-                jc[0].select = True
-                bpy.context.scene.objects.active = jc[0]
-                bpy.ops.object.join()
+    if bpy.context.scene.joincrv == 1:
+        crv=0
+        for s in  range(len(bpy.selection_msc)):    
+            crv+=1
+        print('osc', crv)
+        while crv>=1:
+            if crv >=1:
+                j = bpy.selection_msc
+                jc=j.copy()
                 bpy.ops.object.select_all(action='TOGGLE')
-                jc.remove(jc[1])
-        break
-    bpy.context.scene.joincrv = 0
-#    bpy.context.scene.joincrv = 0
+                for i in range(crv):
+                    crv-=1
+                    jc[1].select = True
+                    jc[0].select = True
+                    bpy.context.scene.objects.active = jc[0]
+                    bpy.ops.object.join()
+                    bpy.ops.object.select_all(action='TOGGLE')
+                    jc.remove(jc[1])
+            break
+        bpy.context.scene.joincrv = 0
+    #    bpy.context.scene.joincrv = 0
     return
   
 bpy.types.Scene.joincrv = BoolProperty(
@@ -1553,8 +1579,8 @@ def srchs(self, context):
 bpy.types.Scene.Sdup = bpy.props.EnumProperty(
         items=[('LOCAL', 'LOCAL', 'Location of the objectL'),
                 ('LOCAL_ROTATE', 'LOCAL_ROTATE', 'Location of the object & Rotation in Eulers')],
-        name = "Search parameter",
-        description = "Location of the object\n& Rotation in Eulers",
+        name = "SRCH",
+        description = "Location of the object\n& Rotation in Eulers", 
         update=srchs)
 def listmatcap(self, context):
     if bpy.context.space_data.use_matcap == True:
@@ -1954,6 +1980,7 @@ class AUTPanel(bpy.types.Panel):
 #-----> """End"""
 
 def register():
+    bpy.utils.register_class(Del_SObj)
     bpy.utils.register_class(QuickMirror)
     bpy.utils.register_class(QuickShrink)
     bpy.utils.register_class(Matrix)
@@ -2000,6 +2027,7 @@ def unregister():
     bpy.utils.unregister_class(Crlwo)
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
+    bpy.utils.unregister_class(Del_SObj)
 
 if __name__ == "__main__":
    register()
