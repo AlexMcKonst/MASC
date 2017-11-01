@@ -51,32 +51,6 @@ class MASCSelection(bpy.types.Header):
         """
         bpy.selection_msc
         """
-class Del_SObj(bpy.types.Operator):
-    '''Removes dependence of selected objects\nfrom all layers of the "Super_Grouper" stack
-    '''   
-    bl_idname = "scene.sgobjsdel"
-    bl_label = "SG_Sel_DEL"
-    bl_options = {"REGISTER", "UNDO"}
-    
-#    @classmethod
-#    def poll(cls, context):
-#        if bpy.selection_msc == []:
-#            pass
-#        return
-    def execute(self, context):
-        if bpy.selection_msc != []:
-            try:
-                for i in range(len(bpy.context.scene.super_groups.items())):
-                    print ('removed from %s' % bpy.context.scene.super_groups.items()[i][0])
-                    bpy.context.scene.super_groups_index = i
-                    bpy.ops.super_grouper.super_remove_from_group()
-                self.report({'INFO'}, "OK. objects are separated")   
-                bpy.ops.object.select_all(action='TOGGLE') 
-            except AttributeError:
-                self.report({'WARNING'}, "'I'm sorry the addon 'super_grouper' is not active or not installed")
-        else:
-            self.report({'WARNING'}, "No selected objects")
-        return {"FINISHED"}
 
 bpy.types.Scene.CurvBox = BoolProperty(
         default = 0
@@ -161,12 +135,12 @@ def Edg_covertCrv(self, context):
     bpy.ops.object.convert(target='CURVE')
     bpy.ops.object.editmode_toggle()
     bpy.ops.curve.spline_type_set(type='BEZIER')
-    bpy.ops.curve.subdivide()
+#    bpy.ops.curve.subdivide()
     bpy.ops.curve.handle_type_set(type='AUTOMATIC')
-    bpy.ops.curve.smooth()
-    bpy.ops.curve.smooth()
-    bpy.ops.curve.smooth()
-    bpy.ops.curve.smooth()
+#    bpy.ops.curve.smooth()
+#    bpy.ops.curve.smooth()
+#    bpy.ops.curve.smooth()
+#    bpy.ops.curve.smooth()
     bpy.ops.object.editmode_toggle()
     bpy.context.scene.EdgConvert = False
     return 
@@ -278,7 +252,7 @@ class QuickMirror(bpy.types.Operator):
         bpy.context.object.modifiers[lst].use_z = self.axm[2]
         bpy.context.scene.objects.active = sel[1]   
         return {"FINISHED"}
-     
+
 #-----> """Grading of objects""
 class Gradobj(bpy.types.Operator):
     """Graduation"""
@@ -822,6 +796,25 @@ class AplyJion(bpy.types.Operator):
                     bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
 
         return {"FINISHED"}
+
+class SymSculpt(bpy.types.Operator):
+    """SymSculpt"""
+    bl_idname = "scene.symsculpt"
+    bl_label = "SXS"
+    bl_options = {"REGISTER", "UNDO"}
+    
+    axm = BoolVectorProperty(
+            name="Axis", 
+            description="Axis", 
+            default=(0, 0, 0),
+            subtype = 'XYZ')
+
+    def execute(self, context):
+        sc=bpy.context.scene.name
+        bpy.data.scenes[sc].tool_settings.sculpt.use_symmetry_x = self.axm[0]
+        bpy.data.scenes[sc].tool_settings.sculpt.use_symmetry_y = self.axm[1]
+        bpy.data.scenes[sc].tool_settings.sculpt.use_symmetry_z = self.axm[2]
+        return {'FINISHED'}
 
 #-----> """Sculpt"""
 class SculptMyDint(bpy.types.Operator):
@@ -1970,7 +1963,7 @@ class AUTPanel(bpy.types.Panel):
 #        layout.prop(scene, 'CurvBox', icon='IPO_BEZIER' if bpy.context.scene.CurvBox == 0 else 'DOWNARROW_HLT', text = 'SBox')
         if bpy.context.scene.CurvBox == True:
             layout.prop(scene, 'EdgConvert', icon='SNAP_EDGE', text='Curver')
-            if bpy.context.selected_objects[0].type == 'CURVE':
+            if bpy.context.scene.objects.active.type == 'CURVE':
                 layout.prop(scene, 'SerSpline', icon='IPO_QUINT', text = 'Separator')
                 layout.prop(scene, 'joincrv', icon='IPO_CIRC', text='Connector')
                 if edm !='EDIT_MESH':
@@ -1980,7 +1973,7 @@ class AUTPanel(bpy.types.Panel):
 #-----> """End"""
 
 def register():
-    bpy.utils.register_class(Del_SObj)
+    bpy.utils.register_class(SymSculpt)
     bpy.utils.register_class(QuickMirror)
     bpy.utils.register_class(QuickShrink)
     bpy.utils.register_class(Matrix)
@@ -2005,6 +1998,7 @@ def register():
     bpy.utils.register_class(MASCSelection)
 
 def unregister():
+    bpy.utils.unregister_class(SymSculpt)
     bpy.utils.unregister_class(QuickMirror)
     bpy.utils.unregister_class(QuickShrink)
     bpy.utils.unregister_class(MASCSelection)
@@ -2027,7 +2021,6 @@ def unregister():
     bpy.utils.unregister_class(Crlwo)
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
-    bpy.utils.unregister_class(Del_SObj)
 
 if __name__ == "__main__":
    register()
