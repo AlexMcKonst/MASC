@@ -2,7 +2,7 @@
 bl_info = {
     "name": "MASC",
     "author": "Alex McKonst",
-    "version": (1, 7, 10),
+    "version": (1, 7, 11),
     "blender": (2, 79, 0),
     "location": "Mesh",
     "description": "'MASC' is a set of scenarios for automating routine workflows and settings.",
