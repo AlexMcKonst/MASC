@@ -5,7 +5,7 @@ bl_info = {
     "version": (1, 7, 11),
     "blender": (2, 79, 0),
     "location": "Mesh",
-    "description": "'MASC' is a set of scenarios for automating routine workflows and settings.",
+    "description": "'MASC' - 'daily tasks with simple code'",
     "warning": "WIP",
     "wiki_url": "",
     "tracker_url": "https://github.com/AlexMcKonst/MASC",
