@@ -39,6 +39,20 @@ def select_msc():
                     if (it in bpy.context.selected_objects) is False:
                         bpy.selection_msc.remove(it)
 
+def selNullitems(self, context):
+    for i in bpy.context.selected_objects:
+        if i.type =='MESH':
+            if i.data.vertices.items() != []:
+                i.select = False
+        else:
+            i.select = False
+    bpy.context.scene.SelNitms = 0
+    return
+
+bpy.types.Scene.SelNitms = BoolProperty(
+        default = 0,
+        update = selNullitems
+        )
 
 class MASCSelection(bpy.types.Header):
     bl_label = "Selection MASC"
@@ -96,21 +110,23 @@ def joincr(self, context):
             crv+=1
         print('osc', crv)
         while crv>=1:
-            if crv >=1:
-                j = bpy.selection_msc
-                jc=j.copy()
-                bpy.ops.object.select_all(action='TOGGLE')
-                for i in range(crv):
-                    crv-=1
-                    jc[1].select = True
-                    jc[0].select = True
-                    bpy.context.scene.objects.active = jc[0]
-                    bpy.ops.object.join()
+            try:
+                if crv >=1:
+                    j = bpy.selection_msc
+                    jc=j.copy()
                     bpy.ops.object.select_all(action='TOGGLE')
-                    jc.remove(jc[1])
+                    for i in range(crv):
+                        crv-=1
+                        jc[1].select = True
+                        jc[0].select = True
+                        bpy.context.scene.objects.active = jc[0]
+                        bpy.ops.object.join()
+                        bpy.ops.object.select_all(action='TOGGLE')
+                        jc.remove(jc[1])
+            except IndexError:
+                pass
             break
-        bpy.context.scene.joincrv = 0
-    #    bpy.context.scene.joincrv = 0
+    bpy.context.scene.joincrv = 0
     return
   
 bpy.types.Scene.joincrv = BoolProperty(
@@ -251,6 +267,73 @@ class QuickMirror(bpy.types.Operator):
         bpy.context.object.modifiers[lst].use_y = self.axm[1]
         bpy.context.object.modifiers[lst].use_z = self.axm[2]
         bpy.context.scene.objects.active = sel[1]   
+        return {"FINISHED"}
+
+#----->
+def delPD(self, context):
+    nm = bpy.selection_msc[0].name
+    try:
+        for i in range(len(bpy.context.active_object.items())):
+            for e in range(len(bpy.data.shape_keys[nm].key_blocks.items())):
+                nmkey=bpy.data.shape_keys[nm].key_blocks.items()[e][0]
+                if bpy.context.active_object.items()[i][0] == nmkey:
+                    bpy.ops.wm.properties_remove(data_path="object", property=nmkey)
+    except IndexError:
+        pass
+    bpy.context.scene.delPD = 0
+
+
+    return
+
+bpy.types.Scene.delPD = BoolProperty(
+        default = 0,
+        update = delPD
+        )
+
+bpy.types.Scene.addDrv = BoolProperty(
+        default = 0
+        )
+bpy.types.Scene.nameDrv = StringProperty(
+        default = ''
+        )
+
+class ProDrive(bpy.types.Operator):
+    """"""
+    bl_idname = "scene.prodrive"
+    bl_label = "Prodrive"
+#    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        if bpy.data.shape_keys.items() !=[]:
+            from rna_prop_ui import rna_idprop_ui_prop_get 
+            nm = bpy.selection_msc[0].name
+            bpy.selection_msc[0].data.shape_keys.name = nm
+            inkey = bpy.context.object.active_shape_key_index # index active key
+            bpy.data.shape_keys[nm].key_blocks[inkey].driver_add('value') # active shape
+            bpy.context.object.use_shape_key_edit_mode = True
+            nmd=bpy.context.active_object.active_shape_key.name
+            bpy.data.shape_keys[nm].animation_data.drivers[inkey-1].driver.variables.new() # id
+            bpy.data.shape_keys[nm].animation_data.drivers[inkey-1].driver.variables[0].targets[0].id = bpy.selection_msc[0] # id
+
+            ## expression
+            bpy.data.shape_keys[nm].animation_data.drivers[inkey-1].driver.expression = 'var'
+            ## add property
+            bpy.context.active_object[nmd] = 1.0
+            ## data_path -> targets
+            bpy.data.shape_keys[nm].animation_data.drivers[inkey-1].driver.variables[0].targets[0].data_path = '["'+nmd+'"]'
+
+            ##---Thanks Nikita Akimov---##
+            obj = bpy.context.active_object 
+
+            prop_ui = rna_idprop_ui_prop_get(obj, nmd)
+            prop_ui["soft_min"] = 0.0
+            prop_ui["soft_max"] = 1.0 
+
+            for area in bpy.context.screen.areas: 
+                area.tag_redraw()
+            ##--------------------------##
+        else:
+            self.report({'WARNING'}, "Shape Key is []")
         return {"FINISHED"}
 
 #-----> """Grading of objects""
@@ -1758,7 +1841,79 @@ class Matrix(bpy.types.Operator):
                         continue
         return {'FINISHED'}
 
+class StaTick(bpy.types.Operator):
+    bl_idname = "scene.stick"
+    bl_label = "STick"
+#    bl_options = {"REGISTER", "UNDO"}
+    
+    min = bpy.props.FloatProperty(
+        name="MIN",
+        default=0.55,
+        min=0.0)
+    max = bpy.props.FloatProperty(
+        name="MAX",
+        default=0.58,
+        min=0.0)
+    mns= bpy.props.BoolProperty(
+        name='minus',
+        default=0
+        )
+    ax = bpy.props.BoolVectorProperty(
+        name='axis',
+        subtype='XYZ',
+        default=(1, 0, 0)
+        )
+    hh=bpy.props.BoolProperty(
+        name='hh',
+        options={'HIDDEN'},
+        default=0
+        )
+    def execute(self, context):
+        obj1=bpy.context.selected_objects[0]
+        bpy.ops.object.select_all(action='TOGGLE')
 
+        for i in bpy.context.visible_objects:
+            if "MA_" in i.name:
+                i.select = True
+                bpy.ops.object.delete(use_global=False)
+            else:
+                pass
+
+        obj1.select=True
+
+        if self.mns == 1:
+            move = -1*(bpy.context.active_object.dimensions[0]+2)         
+        else:    
+            move = bpy.context.active_object.dimensions[0]+2
+
+        bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, 
+                                    TRANSFORM_OT_translate={"value":(0, 0, 0), 
+                                    "constraint_axis":(False, False, False), 
+                                    "constraint_orientation":'GLOBAL'})
+        bpy.ops.transform.translate(value=(
+            move if self.ax[0] else 0,
+            move if self.ax[1] else 0,
+            move if self.ax[2] else 0), 
+            constraint_axis=(self.ax), 
+            constraint_orientation='GLOBAL', 
+            mirror=False, proportional='DISABLED', 
+            proportional_edit_falloff='SMOOTH', 
+            proportional_size=1, release_confirm=True)      
+ 
+        bpy.ops.object.convert(target='MESH')
+        bpy.ops.object.editmode_toggle()
+        bpy.context.object.data.show_statvis = True
+        bpy.context.scene.tool_settings.statvis.type = 'THICKNESS'
+        bpy.context.scene.tool_settings.statvis.thickness_min = self.min
+        bpy.context.scene.tool_settings.statvis.thickness_max = self.max
+        bpy.context.scene.tool_settings.statvis.thickness_samples = 5
+        bpy.ops.mesh.select_mode(use_extend=False, use_expand=True, type='EDGE')
+        bpy.context.selected_objects[0].name = "MA_"+bpy.context.selected_objects[0].name
+        return {"FINISHED"}  
+    
+    def invoke(self, context, event):
+        global max, min
+        return context.window_manager.invoke_props_dialog(self)
 
 class AUTPanel(bpy.types.Panel):
 
@@ -1783,7 +1938,8 @@ class AUTPanel(bpy.types.Panel):
 
         self.layout.prop(view, "use_matcap", text="",
         icon='MATCAP_%s' % bpy.context.space_data.matcap_icon if  bpy.context.space_data.use_matcap == True else 'MATCAP_01')
-
+    
+#        self.layout.prop(scene, "SelNitms", text="")
 # SSAO
         view = context.space_data
         scene = context.scene
@@ -1966,13 +2122,17 @@ class AUTPanel(bpy.types.Panel):
             if bpy.context.scene.objects.active.type == 'CURVE':
                 layout.prop(scene, 'SerSpline', icon='IPO_QUINT', text = 'Separator')
                 layout.prop(scene, 'joincrv', icon='IPO_CIRC', text='Connector')
-                if edm !='EDIT_MESH':
-                    if edm != 'SCULPT':
-                        layout.operator("scene.crlwo", text='CW' , icon="MESH_TORUS")
+            if edm !='EDIT_MESH':
+                if edm != 'SCULPT':
+                    layout.operator("scene.crlwo", text='CW' , icon="MESH_TORUS")
+        if bpy.data.shape_keys.items() != []:    
+            layout.prop(scene, 'delPD', icon='RNA', text = 'Del_Prop')
         
 #-----> """End"""
 
 def register():
+    bpy.utils.register_class(StaTick)
+    bpy.utils.register_class(ProDrive)
     bpy.utils.register_class(SymSculpt)
     bpy.utils.register_class(QuickMirror)
     bpy.utils.register_class(QuickShrink)
@@ -2021,6 +2181,8 @@ def unregister():
     bpy.utils.unregister_class(Crlwo)
     bpy.utils.unregister_class(ExpS)
     bpy.utils.unregister_class(Matrix)
+    bpy.utils.unregister_class(ProDrive)
+    bpy.utils.unregister_class(StaTick)
 
 if __name__ == "__main__":
    register()
