@@ -12,3 +12,6 @@ blenderartists https://blenderartists.org/forum/showthread.php?417317-Addon-MASC
 
 INSTALL:
 Just copy the file "MASC.py" in the directory "...Blender Foundation\Blender\2.78\scripts\addons"
+
+You can donate if you like the tools:
+http://paypal.me/AlexM3D
