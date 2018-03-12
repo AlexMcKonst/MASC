@@ -78,7 +78,7 @@ def selallcr(self, context):
             lsb=len(bpy.context.object.data.splines[s].bezier_points.items())
             for b in range(lsb):
                 spv=bpy.context.object.data.splines[s].bezier_points[b]
-                spv.tilt = False
+                #spv.tilt = False
                 spv.select_control_point = False
                 spv.select_right_handle = False
                 spv.select_left_handle = False
@@ -90,7 +90,7 @@ def selallcr(self, context):
                 if s!=1:
                     for b in range(len(bpy.context.object.data.splines[s].bezier_points.items())):
                         spv=bpy.context.object.data.splines[s].bezier_points[b]
-                        spv.tilt = True
+                        #spv.tilt = True
                         spv.select_control_point = True
                         spv.select_right_handle = True
                         spv.select_left_handle = True                       
